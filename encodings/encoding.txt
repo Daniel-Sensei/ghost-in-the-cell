@@ -1,0 +1,8 @@
+inMatrix(X,Y,F) :- &rand(0,R; X), &rand(0,C; Y), factory(F), rows(R), cols(C).
+
+assigned(F) :- inMatrix(_,_,F).
+:-factory(F), not assigned(F).
+
+:- inMatrix(X,Y,F1), inMatrix(X,Y,F2), F1 != F2.
+:- inMatrix(X1,Y,F), inMatrix(X2,Y,F), X1 != X2.
+:- inMatrix(X,Y1,F), inMatrix(X,Y2,F), Y1 != Y2.
