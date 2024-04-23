@@ -15,21 +15,37 @@ import java.util.ArrayList;
 public class GamePanel extends JPanel {
     private ArrayList<Position> factories;
     private ArrayList<Pair<Position, Position>> edges;
+    private ArrayList<Projectile> projectiles;
+    private Timer projectileTimer;
+    private int projectileSpeed = 1; // Velocità del proiettile in blocchi per secondo
+
+    public void startProjectileAnimation() {
+        if (projectileTimer == null) {
+            projectileTimer = new Timer(1000 / projectileSpeed, e -> {
+                moveProjectiles();
+                repaint();
+            });
+            projectileTimer.start();
+        }
+    }
+
+    private void moveProjectiles() {
+        for (Projectile projectile : projectiles) {
+            if (!projectile.isReachedDestination()) {
+                projectile.move();
+            }
+        }
+    }
 
     public GamePanel() {
         reset();
+        initializeFactories();
+        initializeEdges();
+        initializeProjectiles();
     }
 
-    public void reset() {
-        this.setBackground(Color.WHITE);
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Game game = Game.getGame();
-
-        World world = game.getWorld();
+    private void initializeFactories(){
+        World world = Game.getGame().getWorld();
 
         //Crea un array di factories
         factories = new ArrayList<>();
@@ -41,10 +57,12 @@ public class GamePanel extends JPanel {
                 }
             }
         }
+    }
 
+    private void initializeEdges(){
         //Imposta collegamenti casuali tra factories casuali in edges
         edges = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 5; i++) {
             int index1 = (int) (Math.random() * factories.size());
             int index2 = (int) (Math.random() * factories.size());
             while (index1 == index2) {
@@ -55,6 +73,24 @@ public class GamePanel extends JPanel {
             edges.add(new Pair<>(factory1, factory2));
             //break;
         }
+    }
+
+    private void initializeProjectiles(){
+        //Per ogni arco in edges genera un proiettile
+        projectiles = new ArrayList<>();
+        for (Pair<Position, Position> edge : edges) {
+            projectiles.add(new Projectile(edge.a, edge.b, Color.RED));
+        }
+    }
+
+    public void reset() {
+        this.setBackground(Color.WHITE);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        //Game game = Game.getGame();
 
         //Crea un array di colori pari al numero di edges
         Color[] edgeColors = new Color[edges.size()];
@@ -62,9 +98,14 @@ public class GamePanel extends JPanel {
             edgeColors[i] = new Color((int) (Math.random() * 0x1000000));
         }
 
-        //Disegna le linee tra gli edges
+        // Disegna le linee tra gli edges
         for (Pair<Position, Position> edge : edges) {
-            drawStraightLine(g, edge.a, edge.b, edgeColors[edges.indexOf(edge)]);
+            drawStraightLine(g, edge.a, edge.b, Color.PINK);
+        }
+
+        // Disegna i proiettili
+        for (Projectile projectile : projectiles) {
+            projectile.draw(g);
         }
 
         // Disegna le fabbriche
@@ -81,6 +122,16 @@ public class GamePanel extends JPanel {
 
              */
         }
+
+        //per ogni blocco stampa le sue coordinate
+        for(int i = 0; i < Game.getGame().getWorld().getSize(); i++){
+            for(int j = 0; j < Game.getGame().getWorld().getSize(); j++){
+                g.setColor(Color.BLACK);
+                g.drawString(i + "," + j, i * Settings.BLOCK_SIZE + Settings.BLOCK_SIZE / 2, j * Settings.BLOCK_SIZE + Settings.BLOCK_SIZE / 2);
+            }
+        }
+
+        startProjectileAnimation();
     }
 
     private void drawStraightLine(Graphics g, Position p1, Position p2, Color color) {
@@ -188,8 +239,8 @@ public class GamePanel extends JPanel {
             if (!path.contains(currentPos)) {
                 path.add(currentPos);
             } else {
-                System.out.println("Path tra " + start + " e " + end);
-                System.out.println("Sovrapposizione");
+                //System.out.println("Path tra " + start + " e " + end);
+                //System.out.println("Sovrapposizione");
                 //break;
 
                 //Aggiunge il prossimo passo del percorso senza considerare le factories
