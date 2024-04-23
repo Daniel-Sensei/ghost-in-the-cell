@@ -20,6 +20,7 @@ public class World {
         generateFactory(numFactories);
         //print in standard output
         //0 for empty, 1 for factory
+        /*
         for (int i = 0; i < blocks.length; i++) {
             for (int j = 0; j < blocks.length; j++) {
                 if (blocks[i][j] == Block.EMPTY)
@@ -29,6 +30,8 @@ public class World {
             }
             System.out.println();
         }
+
+         */
     }
 
     private void generateFactory(int N) {
