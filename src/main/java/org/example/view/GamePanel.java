@@ -15,6 +15,7 @@ import java.util.ArrayList;
 public class GamePanel extends JPanel {
     private ArrayList<Position> factories;
     private ArrayList<Pair<Position, Position>> edges;
+    private ArrayList<ArrayList<Position>> paths = new ArrayList<>();
     private ArrayList<Projectile> projectiles;
     private Timer projectileTimer;
     private int projectileSpeed = 1; // Velocità del proiettile in blocchi per secondo
@@ -41,6 +42,7 @@ public class GamePanel extends JPanel {
         reset();
         initializeFactories();
         initializeEdges();
+        initializePaths();
         initializeProjectiles();
     }
 
@@ -62,7 +64,7 @@ public class GamePanel extends JPanel {
     private void initializeEdges(){
         //Imposta collegamenti casuali tra factories casuali in edges
         edges = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             int index1 = (int) (Math.random() * factories.size());
             int index2 = (int) (Math.random() * factories.size());
             while (index1 == index2) {
@@ -75,11 +77,17 @@ public class GamePanel extends JPanel {
         }
     }
 
+    private void initializePaths(){
+        for (Pair<Position, Position> edge : edges) {
+            paths.add(calculatePath(edge.a, edge.b));
+        }
+    }
+
     private void initializeProjectiles(){
         //Per ogni arco in edges genera un proiettile
         projectiles = new ArrayList<>();
-        for (Pair<Position, Position> edge : edges) {
-            projectiles.add(new Projectile(edge.a, edge.b, Color.RED));
+        for (ArrayList<Position> path : paths) {
+            projectiles.add(new Projectile(path, Color.RED));
         }
     }
 
@@ -103,11 +111,6 @@ public class GamePanel extends JPanel {
             drawStraightLine(g, edge.a, edge.b, Color.PINK);
         }
 
-        // Disegna i proiettili
-        for (Projectile projectile : projectiles) {
-            projectile.draw(g);
-        }
-
         // Disegna le fabbriche
         for (Position factory : factories) {
             Color c = Color.GREEN;
@@ -121,6 +124,11 @@ public class GamePanel extends JPanel {
                     factory.y() * Settings.BLOCK_SIZE + Settings.BLOCK_SIZE / 2);
 
              */
+        }
+
+        // Disegna i proiettili
+        for (Projectile projectile : projectiles) {
+            projectile.draw(g);
         }
 
         //per ogni blocco stampa le sue coordinate
