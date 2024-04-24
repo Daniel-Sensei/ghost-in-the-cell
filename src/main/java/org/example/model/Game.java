@@ -20,4 +20,8 @@ public class Game {
             game = new Game();
         return game;
     }
+
+    public void doMoves(){
+        // TODO implement by cycling through the moves (Transit Class)
+    }
 }
