@@ -3,6 +3,7 @@ package org.example.view;
 import org.example.config.Settings;
 import org.example.model.Game;
 import org.example.model.Position;
+import org.example.model.objects.Factory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -105,14 +106,19 @@ public class GamePanel extends JPanel {
 
                 // Disegna le linee per i percorsi
                 for (ArrayList<Position> path : Game.getGame().getWorld().getPaths()) {
-                    drawLines(g, path, Color.BLUE);
+                    drawStraightLine(g, path, Color.BLUE);
                 }
 
                 // Disegna le fabbriche
-                for (Position factory : Game.getGame().getWorld().getFactories()) {
-                    Color c = Color.GREEN;
+                for (Factory factory : Game.getGame().getWorld().getFactories()) {
+                    Color c = Color.GRAY;
+                    if (factory.getPlayer() == 1) {
+                        c = new Color(128, 0, 128);
+                    } else if (factory.getPlayer() == -1) {
+                        c = Color.ORANGE;
+                    }
                     g.setColor(c);
-                    g.fillOval(factory.x() * Settings.BLOCK_SIZE, factory.y() * Settings.BLOCK_SIZE, Settings.BLOCK_SIZE,
+                    g.fillOval(factory.getPosition().x() * Settings.BLOCK_SIZE, factory.getPosition().y() * Settings.BLOCK_SIZE, Settings.BLOCK_SIZE,
                             Settings.BLOCK_SIZE);
                 }
 
@@ -145,7 +151,7 @@ public class GamePanel extends JPanel {
         super.paintComponent(g);
     }
 
-    private void drawLines(Graphics g, ArrayList<Position> path, Color color) {
+    private void drawStraightLine(Graphics g, ArrayList<Position> path, Color color) {
         if (path.size() > 1) {
             Position prev = path.get(0);
             for (int i = 1; i < path.size(); i++) {

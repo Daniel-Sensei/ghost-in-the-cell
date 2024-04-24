@@ -2,6 +2,8 @@ package org.example.model;
 
 import org.antlr.v4.runtime.misc.Pair;
 import org.example.config.Settings;
+import org.example.model.objects.Edge;
+import org.example.model.objects.Factory;
 import org.example.view.Projectile;
 
 import java.awt.*;
@@ -13,8 +15,11 @@ public class World {
 
     private int numFactories;
 
-    private ArrayList<Position> factories;
-    private ArrayList<Pair<Position, Position>> edges;
+    private ArrayList<Factory> factories;
+
+    private ArrayList<Pair<Position, Position>> edgesPosition;
+    private ArrayList<Edge> edgesObject = new ArrayList<>();
+
     private ArrayList<ArrayList<Position>> paths = new ArrayList<>();
     private ArrayList<Projectile> projectiles;
 
@@ -80,35 +85,58 @@ public class World {
     private void initializeFactories(){
         //Crea un array di factories
         factories = new ArrayList<>();
+        int initialTroops = (int) (Math.random() * (Settings.MIN_INITIAL_TROOPS + 1)) + Settings.MAX_INITIAL_TROOPS - Settings.MIN_INITIAL_TROOPS;
+        int initialProduction = (int) (Math.random() * (Settings.MIN_INITIAL_PRODUCTION + 1)) + Settings.MAX_INITIAL_PRODUCTION - Settings.MIN_INITIAL_PRODUCTION;
+        int id = 0;
         for (int i = 0; i < blocks.length; i++) {
             for (int j = 0; j < blocks.length; j++) {
                 Position p = new Position(i, j);
                 if (isFactory(p)) {
-                    factories.add(p);
+                    Factory f = new Factory();
+
+                    f.setId(id);
+                    if(id == 0){
+                        f.setPlayer(1);
+                        f.setTroops(initialTroops);
+                        f.setProduction(initialProduction);
+                    } else if (id == numFactories - 1){
+                        f.setPlayer(-1);
+                        f.setTroops(initialTroops);
+                        f.setProduction(initialProduction);
+                    } else {
+                        f.setPlayer(0);
+                        f.setTroops((int) (Math.random() * (Settings.MAX_NEUTRAL_TROOPS)) + Settings.MIN_NEUTRAL_TROOPS);
+                        f.setProduction((int) (Math.random() * (Settings.MAX_PRODUCTION + 1)));
+                    }
+                    id++;
+
+                    f.setPosition(p);
+
+                    factories.add(f);
                 }
             }
         }
+        System.out.println("Factories: " + factories);
     }
 
     private void initializeEdges(){
-        //Imposta collegamenti casuali tra factories casuali in edges
-        edges = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            int index1 = (int) (Math.random() * factories.size());
-            int index2 = (int) (Math.random() * factories.size());
-            while (index1 == index2) {
-                index2 = (int) (Math.random() * factories.size());
+        //Imposta collegamenti tra tutte le factories come coppie <startPosition, endPosition>
+        //I collegamenti non sono orientati, quindi se c'è un collegamento tra A e B, c'è anche tra B e A
+        //quello tra B e A si omette
+        edgesPosition = new ArrayList<>();
+        for (int i = 0; i < factories.size(); i++) {
+            for (int j = i + 1; j < factories.size(); j++) {
+                edgesPosition.add(new Pair<>(factories.get(i).getPosition(), factories.get(j).getPosition()));
+                //Edge e = new Edge(factories.get(i).getId(), factories.get(j).getId());
             }
-            Position factory1 = factories.get(index1);
-            Position factory2 = factories.get(index2);
-            edges.add(new Pair<>(factory1, factory2));
-            //break;
         }
     }
 
     private void initializePaths(){
-        for (Pair<Position, Position> edge : edges) {
+        for (Pair<Position, Position> edge : edgesPosition) {
             paths.add(calculatePath(edge.a, edge.b));
+
+            paths.add(calculatePath(edge.b, edge.a));
         }
     }
 
@@ -125,6 +153,8 @@ public class World {
         ArrayList<Position> path = new ArrayList<>();
         path.add(start);
 
+        int distance = 0;
+
         int x = start.x();
         int y = start.y();
 
@@ -137,12 +167,15 @@ public class World {
                 if (!isFactory(new Position(x + deltaX, y + deltaY)) || (x + deltaX == end.x() && y + deltaY == end.y())){
                     x += deltaX;
                     y += deltaY;
+                    distance++;
                 } else if (!isFactory(new Position(x + deltaX, y)) || (x + deltaX == end.x() && y == end.y())) {
                     // Sposta orizzontalmente se possibile
                     x += deltaX;
+                    distance++;
                 } else if (!isFactory(new Position(x, y + deltaY)) || (y + deltaY == end.y())) {
                     // Sposta verticalmente se possibile
                     y += deltaY;
+                    distance++;
                 } else {
                     // Se non è possibile muoversi né in orizzontale né in verticale, termina il calcolo
                     System.out.println("Non è possibile muoversi 1");
@@ -152,15 +185,18 @@ public class World {
                 // Sposta orizzontalmente se non si è ancora sulla stessa colonna
                 if (!isFactory(new Position(x + deltaX, y)) || (x + deltaX == end.x())) {
                     x += deltaX;
+                    distance++;
                 } else {
                     // Se non è possibile muoversi orizzontalmente, prova a muoversi in diagonale o verticalmente
                     if (!isFactory(new Position(x + deltaX, y + deltaY))) {
                         // Sposta in diagonale
                         x += deltaX;
                         y += deltaY;
+                        distance++;
                     } else if (!isFactory(new Position(x, y + deltaY)) || (y + deltaY == end.y())) {
                         // Sposta verticalmente
                         y += deltaY;
+                        distance++;
                     } else {
                         // Se non è possibile muoversi diagonalmente o verticalmente, termina il calcolo
                         System.out.println("Path tra " + start + " e " + end);
@@ -172,27 +208,20 @@ public class World {
                 // Sposta verticalmente se non si è ancora sulla stessa riga
                 if (!isFactory(new Position(x, y + deltaY)) || (y + deltaY == end.y())) {
                     y += deltaY;
+                    distance++;
                 } else {
                     // Se non è possibile muoversi verticalmente, prova a muoversi in diagonale
                     if (!isFactory(new Position(x + deltaX, y + deltaY))) {
                         // Sposta in diagonale
                         x += deltaX;
                         y += deltaY;
+                        distance++;
                     } else if (!isFactory(new Position(x + deltaX, y)) || (x + deltaX == end.x())){
                         // Sposta orizzontalmente
                         x += deltaX;
-                    } else {
-                        // Se non è possibile muoversi diagonalmente, termina il calcolo
-                        System.out.println("Path tra " + start + " e " + end);
-                        System.out.println("Non è possibile muoversi 3");
-                        break;
+                        distance++;
                     }
                 }
-            }
-            else {
-                // Se non ci sono spostamenti necessari, termina il calcolo
-                System.out.println("Non ci sono spostamenti necessari");
-                break;
             }
 
             // Aggiunge la posizione corrente al percorso solo se non è già presente
@@ -200,18 +229,33 @@ public class World {
             if (!path.contains(currentPos)) {
                 path.add(currentPos);
             } else {
-                //System.out.println("Path tra " + start + " e " + end);
-                //System.out.println("Sovrapposizione");
-                //break;
-
                 //Aggiunge il prossimo passo del percorso senza considerare le factories
                 x += deltaX;
                 y += deltaY;
+                distance++;
             }
         }
 
-        //System.out.println("Path: " + path);
+        edgesObject.add(addEdgeByPosition(start, end, distance));
+
         return path;
+    }
+
+    private Edge addEdgeByPosition(Position start, Position end, int distance){
+        Edge e = new Edge();
+        e.setF1(factories.get(getFactoryIndexByPosition(start)).getId());
+        e.setF2(factories.get(getFactoryIndexByPosition(end)).getId());
+        e.setDistance(distance);
+        return e;
+    }
+
+    private int getFactoryIndexByPosition(Position p){
+        for (int i = 0; i < factories.size(); i++) {
+            if(factories.get(i).getPosition().equals(p)){
+                return i;
+            }
+        }
+        return -1;
     }
 
 
@@ -242,12 +286,12 @@ public class World {
     }
 
     // GETTERS
-    public ArrayList<Position> getFactories() {
+    public ArrayList<Factory> getFactories() {
         return factories;
     }
 
     public ArrayList<Pair<Position, Position>> getEdges() {
-        return edges;
+        return edgesPosition;
     }
 
     public ArrayList<ArrayList<Position>> getPaths() {

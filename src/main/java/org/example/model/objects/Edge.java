@@ -2,22 +2,22 @@ package org.example.model.objects;
 import it.unical.mat.embasp.languages.Id;
 import it.unical.mat.embasp.languages.Param;
 
-@Id("distance")
-public class Distance {
+@Id("edge")
+public class Edge {
 
     @Param(0)
-    private int f1;
+    private int f1; // id_factory1
 
     @Param(1)
-    private int f2;
+    private int f2; // id_factory2
 
     @Param(2)
-    private int distance;
+    private int distance; // distance between f1 and f2 (expressed in turns)
 
-    public Distance() {
+    public Edge() {
     }
 
-    public Distance(int f1, int f2, int distance) {
+    public Edge(int f1, int f2, int distance) {
         this.f1 = f1;
         this.f2 = f2;
         this.distance = distance;
