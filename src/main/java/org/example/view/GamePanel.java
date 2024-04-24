@@ -9,6 +9,8 @@ import org.example.model.World;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.CubicCurve2D;
 import java.util.ArrayList;
 
@@ -17,18 +19,10 @@ public class GamePanel extends JPanel {
     private ArrayList<Pair<Position, Position>> edges;
     private ArrayList<ArrayList<Position>> paths = new ArrayList<>();
     private ArrayList<Projectile> projectiles;
-    private Timer projectileTimer;
-    private int projectileSpeed = 1; // Velocità del proiettile in blocchi per secondo
+    private Timer gameTimer;
 
-    public void startProjectileAnimation() {
-        if (projectileTimer == null) {
-            projectileTimer = new Timer(1000 / projectileSpeed, e -> {
-                moveProjectiles();
-                repaint();
-            });
-            projectileTimer.start();
-        }
-    }
+    private JPanel matrixPanel;
+    private JPanel bannerPanel;
 
     private void moveProjectiles() {
         for (Projectile projectile : projectiles) {
@@ -38,13 +32,131 @@ public class GamePanel extends JPanel {
         }
     }
 
+    private String player1Name = "Player 1";
+    private String player2Name = "Player 2";
+    private JButton nextTurnButton;
+
+    private void updateGamePanel() {
+        // Imposta il timer a 30 FPS
+        int delay = 1000 / 30;
+        gameTimer = new Timer(delay, e -> {
+            repaint();
+        });
+        gameTimer.start();
+    }
+
     public GamePanel() {
         reset();
+
+        // Imposta il layout del pannello come BorderLayout
+        setLayout(new BorderLayout());
+
+        // Aggiungi il banner nella parte superiore del pannello
+        add(createBanner(), BorderLayout.NORTH);
+        add(createMatrix(), BorderLayout.CENTER);
+
+        updateGamePanel();
+    }
+
+    private JPanel createBanner() {
+        bannerPanel = new JPanel();
+        bannerPanel.setBackground(Color.GRAY); // Imposta il colore di sfondo del banner
+
+        // Layout per il banner
+        bannerPanel.setLayout(new BorderLayout());
+
+        // Etichetta per il nome del giocatore 1 a sinistra
+        JLabel player1Label = new JLabel(player1Name);
+        player1Label.setHorizontalAlignment(SwingConstants.LEFT);
+        bannerPanel.add(player1Label, BorderLayout.WEST);
+
+        // Etichetta per il nome del giocatore 2 a destra
+        JLabel player2Label = new JLabel(player2Name);
+        player2Label.setHorizontalAlignment(SwingConstants.RIGHT);
+        bannerPanel.add(player2Label, BorderLayout.EAST);
+
+        // Aggiungi un pulsante per andare al turno successivo al centro del banner
+        // Aggiungi un pulsante per andare al turno successivo al centro del pannello
+        nextTurnButton = new JButton("Turno successivo");
+        nextTurnButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Crea un nuovo timer per muovere gradualmente i proiettili
+                Timer movementTimer = new Timer(10, new ActionListener() {
+                    double count = 0.0;
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        // Itera attraverso tutti i proiettili e muovili di un passo
+                        for (Projectile projectile : projectiles) {
+                            projectile.move();
+                        }
+                        // Richiama repaint() per aggiornare il pannello dopo ogni movimento
+                        repaint();
+                        count += 0.05;
+                        // Se tutti i proiettili hanno raggiunto la destinazione, ferma il timer
+                        if (count >= 1.0) {
+                            ((Timer) e.getSource()).stop();
+                            System.out.println("Turno successivo");
+                        }
+                    }
+                });
+                // Avvia il timer per muovere gradualmente i proiettili
+                movementTimer.start();
+            }
+        });
+
+        bannerPanel.add(nextTurnButton, BorderLayout.CENTER);
+        return bannerPanel;
+    }
+
+    private JPanel createMatrix() {
         initializeFactories();
         initializeEdges();
         initializePaths();
         initializeProjectiles();
+
+        matrixPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+
+                // Disegna le linee tra gli edges
+                for (Pair<Position, Position> edge : edges) {
+                    drawStraightLine(g, edge.a, edge.b, Color.PINK);
+                }
+
+                // Disegna le fabbriche
+                for (Position factory : factories) {
+                    Color c = Color.GREEN;
+                    g.setColor(c);
+                    g.fillOval(factory.x() * Settings.BLOCK_SIZE, factory.y() * Settings.BLOCK_SIZE, Settings.BLOCK_SIZE,
+                            Settings.BLOCK_SIZE);
+                }
+
+                // Disegna i proiettili
+                for (Projectile projectile : projectiles) {
+                    projectile.draw(g);
+                }
+
+                //per ogni blocco stampa le sue coordinate
+                for (int i = 0; i < Game.getGame().getWorld().getSize(); i++) {
+                    for (int j = 0; j < Game.getGame().getWorld().getSize(); j++) {
+                        g.setColor(Color.BLACK);
+                        g.drawString(i + "," + j, i * Settings.BLOCK_SIZE + Settings.BLOCK_SIZE / 2, j * Settings.BLOCK_SIZE + Settings.BLOCK_SIZE / 2);
+                    }
+                }
+            }
+        };
+
+        // Imposta il layout del pannello della matrice come GridLayout con una riga e una colonna
+        matrixPanel.setLayout(new GridLayout(1, 1));
+
+        // Imposta il colore di sfondo del pannello della matrice
+        matrixPanel.setBackground(Color.WHITE);
+
+        return matrixPanel;
     }
+
 
     private void initializeFactories(){
         World world = Game.getGame().getWorld();
@@ -99,47 +211,6 @@ public class GamePanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         //Game game = Game.getGame();
-
-        //Crea un array di colori pari al numero di edges
-        Color[] edgeColors = new Color[edges.size()];
-        for (int i = 0; i < edges.size(); i++) {
-            edgeColors[i] = new Color((int) (Math.random() * 0x1000000));
-        }
-
-        // Disegna le linee tra gli edges
-        for (Pair<Position, Position> edge : edges) {
-            drawStraightLine(g, edge.a, edge.b, Color.PINK);
-        }
-
-        // Disegna le fabbriche
-        for (Position factory : factories) {
-            Color c = Color.GREEN;
-            g.setColor(c);
-            g.fillOval(factory.x() * Settings.BLOCK_SIZE, factory.y() * Settings.BLOCK_SIZE, Settings.BLOCK_SIZE,
-                    Settings.BLOCK_SIZE);
-
-            /*
-            g.setColor(Color.BLACK);
-            g.drawString(factory.toString(), factory.x() * Settings.BLOCK_SIZE + Settings.BLOCK_SIZE / 2,
-                    factory.y() * Settings.BLOCK_SIZE + Settings.BLOCK_SIZE / 2);
-
-             */
-        }
-
-        // Disegna i proiettili
-        for (Projectile projectile : projectiles) {
-            projectile.draw(g);
-        }
-
-        //per ogni blocco stampa le sue coordinate
-        for(int i = 0; i < Game.getGame().getWorld().getSize(); i++){
-            for(int j = 0; j < Game.getGame().getWorld().getSize(); j++){
-                g.setColor(Color.BLACK);
-                g.drawString(i + "," + j, i * Settings.BLOCK_SIZE + Settings.BLOCK_SIZE / 2, j * Settings.BLOCK_SIZE + Settings.BLOCK_SIZE / 2);
-            }
-        }
-
-        startProjectileAnimation();
     }
 
     private void drawStraightLine(Graphics g, Position p1, Position p2, Color color) {
