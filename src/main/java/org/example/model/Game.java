@@ -15,6 +15,9 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import static java.lang.Math.abs;
 
 public class Game {
     public final static int FORWARD = 0;
@@ -24,6 +27,9 @@ public class Game {
 
     private int turn = 0;
     private ArrayList<TransitTroop> transitTroops = new ArrayList<>();
+
+    private ArrayList<TransitTroop> tempMovesPlayer1 = new ArrayList<>();
+    private ArrayList<TransitTroop> tempMovesPlayer2 = new ArrayList<>();
 
     private Game() {
         endGame = false;
@@ -61,33 +67,145 @@ public class Game {
     }
 
     public void nextTurn(){
-        //CLEAR ALL
-        EmbASPManager.getInstance().getProgram().clearAll();
-        EmbASPManager.getInstance().getHandler().removeAll();
+        checkEndGame();
 
-        // INPUT
-        try {
-            passInputToOracle();
-        } catch (Exception e) {
-            e.printStackTrace();
+        // UPDATE WORLD
+        if(turn > 0) produceCyborgs();
+
+        updateFactoryCyborgReceived();
+
+        int player = 1; //player 1 starts
+        for (int i = 0; i < 2; i++) {
+            //CLEAR ALL
+            EmbASPManager.getInstance().getProgram().clearAll();
+            EmbASPManager.getInstance().getHandler().removeAll();
+
+            // INPUT
+            try {
+                passInputToOracle(player);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            // OUTPUT
+            try {
+                ArrayList<TransitTroop> moves = getOutputFromOracle(player);
+                System.out.println("TempMovesPlayer1: " + tempMovesPlayer1);
+                System.out.println("TempMovesPlayer2: " + tempMovesPlayer2);
+
+                if (player == -1){
+                    if(checkValidMoves(tempMovesPlayer1)){
+                        moves.addAll(tempMovesPlayer1);
+                        tempMovesPlayer1.clear();
+                    }
+                    else{
+                        System.out.println("Mosse non valide player 1: " + tempMovesPlayer1);
+                    }
+                    if(checkValidMoves(tempMovesPlayer2)){
+                        moves.addAll(tempMovesPlayer2);
+                        tempMovesPlayer2.clear();
+                    }
+                    else {
+                        System.out.println("Mosse non valide player 2: " + tempMovesPlayer2);
+                    }
+                }
+
+                if (checkValidMoves(moves)) {
+                    // TODO OK
+                    //System.out.println("Mosse valide: " + moves);
+
+                    // UPDATE WORLD
+                    updateFactoryCyborgsSent(moves);
+                    transitTroops.addAll(moves);
+                    world.addProjectiles(moves);
+                    turn++;
+                } else {
+                    // TODO ERROR (Turn skipped)
+                    System.out.println("Mosse non valide: " + moves);
+                    turn++;
+                }
+            } catch (ObjectNotValidException | IllegalAnnotationException e) {
+                e.printStackTrace();
+            }
+            player = -1; //change player
         }
-        System.out.println(EmbASPManager.getInstance().getProgram().getPrograms());
 
-        // OUTPUT
-        try {
-            ArrayList<TransitTroop> moves = getOutputFromOracle();
-            System.out.println(moves);
-        } catch (ObjectNotValidException | IllegalAnnotationException e) {
-            e.printStackTrace();
+        System.out.println("Moves: " + transitTroops);
+    }
+
+    private void produceCyborgs() {
+        for (Factory factory : world.getFactories()) {
+            if (factory.getPlayer() == 1 || factory.getPlayer() == -1){
+                factory.setCyborgs(factory.getCyborgs() + factory.getProduction());
+            }
         }
     }
 
-    private void passInputToOracle() throws Exception {
+    private void updateFactoryCyborgsSent(ArrayList<TransitTroop> moves) {
+        // UPDATE FACTORIES
+        for(TransitTroop move : moves){
+            Factory factory = world.getFactoryById(move.getF1());
+            factory.setCyborgs(factory.getCyborgs() - move.getCyborgs());
+        }
+    }
+
+    private void moveTroops(ArrayList<TransitTroop> moves) {
+        for (TransitTroop move : moves) {
+            move.setCurrentTurn(move.getCurrentTurn() + 1);
+        }
+    }
+
+    private void updateFactoryCyborgReceived() {
+        // UPDATE FACTORIES
+        for(TransitTroop move : transitTroops){
+            move.setCurrentTurn(move.getCurrentTurn() + 1);
+
+            if (move.getCurrentTurn() >= move.getDistance()) {
+                System.out.println("ARRIVATO A DESTINAZIONE: " + move);
+                //PLAYER 1
+                if (move.getPlayer() == 1 && (world.getFactoryById(move.getF2()).getPlayer() == -1 || world.getFactoryById(move.getF2()).getPlayer() == 0)) {
+                    //ATTACCO
+                    world.getFactoryById(move.getF2()).setCyborgs(world.getFactoryById(move.getF2()).getCyborgs() - move.getCyborgs());
+                    //CASO IN CUI IL GIOCATORE 1 VINCE
+                    if (world.getFactoryById(move.getF2()).getCyborgs() < 0) {
+                        world.getFactoryById(move.getF2()).setPlayer(1);
+                        world.getFactoryById(move.getF2()).setCyborgs(abs(world.getFactoryById(move.getF2()).getCyborgs()));
+                    }
+                } else if (move.getPlayer() == 1 && world.getFactoryById(move.getF2()).getPlayer() == 1) {
+                    //RINFORZO
+                    world.getFactoryById(move.getF2()).setCyborgs(world.getFactoryById(move.getF2()).getCyborgs() + move.getCyborgs());
+                }
+
+                //PLAYER -1
+                if (move.getPlayer() == -1 && (world.getFactoryById(move.getF2()).getPlayer() == 1 || world.getFactoryById(move.getF2()).getPlayer() == 0)) {
+                    //ATTACCO
+                    world.getFactoryById(move.getF2()).setCyborgs(world.getFactoryById(move.getF2()).getCyborgs() - move.getCyborgs());
+                    //CASO IN CUI IL GIOCATORE -1 VINCE
+                    if (world.getFactoryById(move.getF2()).getCyborgs() < 0) {
+                        world.getFactoryById(move.getF2()).setPlayer(-1);
+                        world.getFactoryById(move.getF2()).setCyborgs(abs(world.getFactoryById(move.getF2()).getCyborgs()));
+                    }
+                } else if (move.getPlayer() == -1 && world.getFactoryById(move.getF2()).getPlayer() == -1) {
+                    //RINFORZO
+                    world.getFactoryById(move.getF2()).setCyborgs(world.getFactoryById(move.getF2()).getCyborgs() + move.getCyborgs());
+                }
+            }
+        }
+
+        // REMOVE TROOPS
+        transitTroops.removeIf(move -> move.getCurrentTurn() == move.getDistance());
+    }
+
+    private void passInputToOracle(int player) throws Exception {
         String encoding = readEncoding("encodings/encoding.asp");
         EmbASPManager.getInstance().getProgram().addProgram(encoding);
 
+        // PLAYER
+        EmbASPManager.getInstance().getProgram().addProgram("player(" + player + ").");
+
         // TURN
-        EmbASPManager.getInstance().getProgram().addProgram("turn(" + turn + ").");
+        EmbASPManager.getInstance().getProgram().addProgram("turn(" + turn + ").");;
+
         // FACTORIES
         for (Factory factory : world.getFactories()) {
             EmbASPManager.getInstance().getProgram().addObjectInput(factory);
@@ -103,10 +221,11 @@ public class Game {
             EmbASPManager.getInstance().getProgram().addObjectInput(transitTroop);
         }
 
+        System.out.println(EmbASPManager.getInstance().getProgram().getPrograms());
         EmbASPManager.getInstance().getHandler().addProgram(EmbASPManager.getInstance().getProgram());
     }
 
-    private ArrayList<TransitTroop> getOutputFromOracle() throws ObjectNotValidException, IllegalAnnotationException {
+    private ArrayList<TransitTroop> getOutputFromOracle(int player) throws ObjectNotValidException, IllegalAnnotationException {
         // GET OUTPUT
         Output output = EmbASPManager.getInstance().getHandler().startSync();
         ASPMapper.getInstance().registerClass(TransitTroop.class);
@@ -116,12 +235,22 @@ public class Game {
         AnswerSets answersets = (AnswerSets) output;
         for(AnswerSet a: answersets.getAnswersets()) {
 
-            System.out.println(a.toString());
+            //System.out.println(a.toString());
             try {
                 for (Object obj : a.getAtoms()) {
                     if (!(obj instanceof TransitTroop)) continue;
                     TransitTroop transitTroop = (TransitTroop) obj;
-                    result.add(transitTroop);
+                    System.out.println(transitTroop);
+                    if(transitTroop.getCurrentTurn() == 0) {
+                        transitTroop.setDistance(world.getDistanceByFactoriesId(transitTroop.getF1(), transitTroop.getF2()) - 1);
+                        if(player == 1)
+                            tempMovesPlayer1.add(transitTroop);
+                        else {
+                            transitTroop.setPlayer(player);
+                            tempMovesPlayer2.add(transitTroop);
+                        }
+                        //result.add(transitTroop);
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -132,5 +261,63 @@ public class Game {
         }
 
         return result;
+    }
+
+    private boolean checkValidMoves(ArrayList<TransitTroop> moves){
+        if (moves.isEmpty()) return false;
+
+        HashMap<Integer, Integer> cyborgsSent = new HashMap<>(); //the key is the factory id, the value is the total cyborgs sent
+        for (TransitTroop move : moves) {
+            //check player
+            if (move.getPlayer() == 0) return false;
+
+            //update cyborgsSent
+            cyborgsSent.put(move.getF1(), cyborgsSent.getOrDefault(move.getF1(), 0) + move.getCyborgs());
+        }
+        System.out.println(cyborgsSent);
+
+        //check if the player has enough cyborgs to send
+        for (Factory factory : world.getFactories()) {
+            if (factory.getPlayer() == 1) {
+                int cyborgs = factory.getCyborgs();
+                if (cyborgs < cyborgsSent.getOrDefault(factory.getId(), 0)) return false;
+            }
+        }
+
+        return true;
+    }
+
+    public boolean isEndGame() {
+        return endGame;
+    }
+
+    public int getTurn() {
+        return turn;
+    }
+
+    private boolean checkEndGame() {
+        if(turn == 200) {
+            endGame = true;
+            return true;
+        }
+        int cont = 0;
+        //check if player 1 or player 2 has all the factories
+        for (Factory factory : world.getFactories()) {
+            if (factory.getPlayer() == 1) cont++;
+        }
+        if (cont == world.getFactories().size()) {
+            endGame = true;
+            return true;
+        }
+
+        cont = 0;
+        for (Factory factory : world.getFactories()) {
+            if (factory.getPlayer() == -1) cont++;
+        }
+        if (cont == world.getFactories().size()) {
+            endGame = true;
+            return true;
+        }
+        return false;
     }
 }

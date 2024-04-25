@@ -1,5 +1,6 @@
 package org.example.view;
 
+import org.example.model.Game;
 import org.example.model.Position;
 import javax.swing.*;
 import java.awt.*;
@@ -13,11 +14,19 @@ public class Projectile {
     private double stepProgress = 0.0; // Progresso del passo corrente (da 0 a 1)
     private Color color;
     private boolean reachedDestination;
+    private int cyborgs;
 
     public Projectile(ArrayList<Position> path, Color color) {
         this.path = path;
         this.color = color;
         this.reachedDestination = false;
+    }
+
+    public Projectile(ArrayList<Position> path, Color color, int cyborgs) {
+        this.path = path;
+        this.color = color;
+        this.reachedDestination = false;
+        this.cyborgs = cyborgs;
     }
 
     public void move() {
@@ -57,11 +66,21 @@ public class Projectile {
                     (int) (y * blockSize + yOffset), // Aggiungi l'offset verticale
                     diameter, diameter // Usa il diametro anziché la dimensione del blocco
             );
+
+            // Disegna il numero di cyborgs all'interno del proiettile
+            // Imposta il grassetto per rendere il testo più leggibile
+            g.setColor(Color.BLACK);
+            g.setFont(new Font("Arial", Font.BOLD, 20));
+            g.drawString(String.valueOf(cyborgs), (int) (x * blockSize + blockSize / 2 - 10), (int) (y * blockSize + blockSize / 2 + 5));
         }
     }
 
     // Funzione per l'interpolazione lineare tra due valori
     private double interpolate(double start, double end, double progress) {
         return start + (end - start) * progress;
+    }
+
+    public ArrayList<Position> getPath() {
+        return path;
     }
 }

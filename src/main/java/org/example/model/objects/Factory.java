@@ -13,7 +13,7 @@ public class Factory {
     private int player;
 
     @Param(2)
-    private int troops;
+    private int cyborgs;
 
     @Param(3)
     private int production; // number between 0 and 3 -- production per turn
@@ -43,12 +43,12 @@ public class Factory {
         this.player = player;
     }
 
-    public int getTroops() {
-        return troops;
+    public int getCyborgs() {
+        return cyborgs;
     }
 
-    public void setTroops(int troops) {
-        this.troops = troops;
+    public void setCyborgs(int cyborgs) {
+        this.cyborgs = cyborgs;
     }
 
     public int getProduction() {
@@ -72,7 +72,7 @@ public class Factory {
         return "Factory{" +
                 "id=" + id +
                 ", player=" + player +
-                ", troops=" + troops +
+                ", cyborgs=" + cyborgs +
                 ", production=" + production +
                 ", position=" + position +
                 '}';

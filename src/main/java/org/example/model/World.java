@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.misc.Pair;
 import org.example.config.Settings;
 import org.example.model.objects.Edge;
 import org.example.model.objects.Factory;
+import org.example.model.objects.TransitTroop;
 import org.example.view.Projectile;
 
 import java.awt.*;
@@ -21,6 +22,7 @@ public class World {
     private ArrayList<Edge> edgesObject = new ArrayList<>();
 
     private ArrayList<ArrayList<Position>> paths = new ArrayList<>();
+    private ArrayList<ArrayList<Position>> activePaths = new ArrayList<>();
     private ArrayList<Projectile> projectiles = new ArrayList<>();
 
     public World() {
@@ -97,15 +99,15 @@ public class World {
                     f.setId(id);
                     if(id == 0){
                         f.setPlayer(1);
-                        f.setTroops(initialTroops);
+                        f.setCyborgs(initialTroops);
                         f.setProduction(initialProduction);
                     } else if (id == numFactories - 1){
                         f.setPlayer(-1);
-                        f.setTroops(initialTroops);
+                        f.setCyborgs(initialTroops);
                         f.setProduction(initialProduction);
                     } else {
                         f.setPlayer(0);
-                        f.setTroops((int) (Math.random() * (Settings.MAX_NEUTRAL_TROOPS)) + Settings.MIN_NEUTRAL_TROOPS);
+                        f.setCyborgs((int) (Math.random() * (Settings.MAX_NEUTRAL_TROOPS)) + Settings.MIN_NEUTRAL_TROOPS);
                         f.setProduction((int) (Math.random() * (Settings.MAX_PRODUCTION + 1)));
                     }
                     id++;
@@ -134,9 +136,7 @@ public class World {
 
     private void initializePaths(){
         for (Pair<Position, Position> edge : edgesPosition) {
-            paths.add(calculatePath(edge.a, edge.b));
-
-            paths.add(calculatePath(edge.b, edge.a));
+            calculateBidirectionalPath(edge.a, edge.b);
         }
     }
 
@@ -148,7 +148,7 @@ public class World {
         }
     }
 
-    private ArrayList<Position> calculatePath(Position start, Position end) {
+    private void calculateBidirectionalPath(Position start, Position end) {
         //System.out.println("Path tra " + start + " e " + end);
         ArrayList<Position> path = new ArrayList<>();
         path.add(start);
@@ -167,15 +167,12 @@ public class World {
                 if (!isFactory(new Position(x + deltaX, y + deltaY)) || (x + deltaX == end.x() && y + deltaY == end.y())){
                     x += deltaX;
                     y += deltaY;
-                    distance++;
                 } else if (!isFactory(new Position(x + deltaX, y)) || (x + deltaX == end.x() && y == end.y())) {
                     // Sposta orizzontalmente se possibile
                     x += deltaX;
-                    distance++;
                 } else if (!isFactory(new Position(x, y + deltaY)) || (y + deltaY == end.y())) {
                     // Sposta verticalmente se possibile
                     y += deltaY;
-                    distance++;
                 } else {
                     // Se non è possibile muoversi né in orizzontale né in verticale, termina il calcolo
                     System.out.println("Non è possibile muoversi 1");
@@ -185,18 +182,15 @@ public class World {
                 // Sposta orizzontalmente se non si è ancora sulla stessa colonna
                 if (!isFactory(new Position(x + deltaX, y)) || (x + deltaX == end.x())) {
                     x += deltaX;
-                    distance++;
                 } else {
                     // Se non è possibile muoversi orizzontalmente, prova a muoversi in diagonale o verticalmente
                     if (!isFactory(new Position(x + deltaX, y + deltaY))) {
                         // Sposta in diagonale
                         x += deltaX;
                         y += deltaY;
-                        distance++;
                     } else if (!isFactory(new Position(x, y + deltaY)) || (y + deltaY == end.y())) {
                         // Sposta verticalmente
                         y += deltaY;
-                        distance++;
                     } else {
                         // Se non è possibile muoversi diagonalmente o verticalmente, termina il calcolo
                         System.out.println("Path tra " + start + " e " + end);
@@ -208,18 +202,15 @@ public class World {
                 // Sposta verticalmente se non si è ancora sulla stessa riga
                 if (!isFactory(new Position(x, y + deltaY)) || (y + deltaY == end.y())) {
                     y += deltaY;
-                    distance++;
                 } else {
                     // Se non è possibile muoversi verticalmente, prova a muoversi in diagonale
                     if (!isFactory(new Position(x + deltaX, y + deltaY))) {
                         // Sposta in diagonale
                         x += deltaX;
                         y += deltaY;
-                        distance++;
                     } else if (!isFactory(new Position(x + deltaX, y)) || (x + deltaX == end.x())){
                         // Sposta orizzontalmente
                         x += deltaX;
-                        distance++;
                     }
                 }
             }
@@ -232,13 +223,20 @@ public class World {
                 //Aggiunge il prossimo passo del percorso senza considerare le factories
                 x += deltaX;
                 y += deltaY;
-                distance++;
             }
+            distance++;
         }
 
-        edgesObject.add(addEdgeByPosition(start, end, distance));
+        this.paths.add(path);
+        //add the reverse path
+        ArrayList<Position> reversePath = new ArrayList<>();
+        for(int i = path.size() - 1; i >= 0; i--){
+            reversePath.add(path.get(i));
+        }
+        this.paths.add(reversePath);
 
-        return path;
+        edgesObject.add(addEdgeByPosition(start, end, distance));
+        edgesObject.add(addEdgeByPosition(end, start, distance));
     }
 
     private Edge addEdgeByPosition(Position start, Position end, int distance){
@@ -289,6 +287,15 @@ public class World {
         return factories;
     }
 
+    public Factory getFactoryById(int id){
+        for (Factory f : factories) {
+            if(f.getId() == id){
+                return f;
+            }
+        }
+        return null;
+    }
+
     public ArrayList<Pair<Position, Position>> getEdgesPosition() {
         return edgesPosition;
     }
@@ -301,11 +308,60 @@ public class World {
         return paths;
     }
 
+    public ArrayList<ArrayList<Position>> getActivePaths() {
+        return activePaths;
+    }
+
+    public void setActivePaths(ArrayList<ArrayList<Position>> activePaths) {
+        this.activePaths = activePaths;
+    }
+
     public ArrayList<Projectile> getProjectiles() {
         return projectiles;
     }
 
     public void addProjectile(Projectile p){
         projectiles.add(p);
+    }
+
+    public void removeProjectile(Projectile p){
+        projectiles.remove(p);
+    }
+
+    public void addProjectiles(ArrayList<TransitTroop> moves){
+        for(TransitTroop move : moves){
+
+            for(Edge edge : edgesObject){
+                if(edge.getF1() == move.getF1() && edge.getF2() == move.getF2()){
+                    //find the path
+                    for(ArrayList<Position> path : paths){
+                        if(path.get(0).equals(factories.get(edge.getF1()).getPosition()) && path.get(path.size() - 1).equals(factories.get(edge.getF2()).getPosition())){
+                            Color color = null;
+                            if (move.getPlayer() == 1)
+                                //color = light purple
+                                color = new Color(128, 0, 128);
+                            else if (move.getPlayer() == -1)
+                                color = Color.ORANGE;
+                            Projectile projectile = new Projectile(path, color, move.getCyborgs());
+                            projectiles.add(projectile);
+                            activePaths.add(path);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void removeActivePath(ArrayList<Position> path){
+        activePaths.remove(path);
+    }
+
+    public int getDistanceByFactoriesId(int f1, int f2){
+        for(Edge edge : edgesObject){
+            if(edge.getF1() == f1 && edge.getF2() == f2){
+                return edge.getDistance();
+            }
+        }
+        return -1;
     }
 }

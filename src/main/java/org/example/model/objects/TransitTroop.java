@@ -3,6 +3,8 @@ package org.example.model.objects;
 import it.unical.mat.embasp.languages.Id;
 import it.unical.mat.embasp.languages.Param;
 
+import java.util.Objects;
+
 @Id("transitTroop")
 public class TransitTroop {
 
@@ -20,6 +22,8 @@ public class TransitTroop {
 
     @Param(4)
     private int cyborgs;
+
+    private int distance;
 
     public TransitTroop() {
     }
@@ -74,6 +78,14 @@ public class TransitTroop {
 
     @Override
     public String toString() {
-        return "transitTroop(" + player + "," + f1 + "," + f2 + "," + currentTurn + "," + cyborgs + ")";
+        return "transitTroop(" + player + "," + f1 + "," + f2 + "," + currentTurn + "," + cyborgs + "," + distance + ")";
+    }
+
+    public int getDistance() {
+        return distance;
+    }
+
+    public void setDistance(int distance) {
+        this.distance = distance;
     }
 }

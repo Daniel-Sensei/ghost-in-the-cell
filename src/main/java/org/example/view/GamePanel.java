@@ -41,6 +41,23 @@ public class GamePanel extends JPanel {
         // Imposta il timer a 30 FPS
         int delay = 1000 / 30;
         gameTimer = new Timer(delay, e -> {
+            // Delete old projectiles
+            ArrayList<Projectile> toRemove = new ArrayList<>();
+            for(Projectile projectile : Game.getGame().getWorld().getProjectiles()) {
+                if(projectile.isReachedDestination()) {
+                    toRemove.add(projectile);
+                }
+            }
+            Game.getGame().getWorld().getProjectiles().removeAll(toRemove);
+
+            // Delete old active paths
+            Game.getGame().getWorld().getActivePaths().clear();
+            ArrayList<ArrayList<Position>> activePaths = new ArrayList<>();
+            for(Projectile projectile : Game.getGame().getWorld().getProjectiles()) {
+                activePaths.add(projectile.getPath());
+            }
+            Game.getGame().getWorld().setActivePaths(activePaths);
+
             repaint();
         });
         gameTimer.start();
@@ -65,7 +82,7 @@ public class GamePanel extends JPanel {
 
         // Aggiungi un pulsante per andare al turno successivo al centro del banner
         // Aggiungi un pulsante per andare al turno successivo al centro del pannello
-        nextTurnButton = new JButton("Turno successivo");
+        nextTurnButton = new JButton("Turno successivo: " + Game.getGame().getTurn());
         nextTurnButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -86,7 +103,7 @@ public class GamePanel extends JPanel {
                         // Se tutti i proiettili hanno raggiunto la destinazione, ferma il timer
                         if (count >= 1.0) {
                             ((Timer) e.getSource()).stop();
-                            System.out.println("Fine transizione proiettili");
+                            //System.out.println("Fine transizione proiettili");
                         }
                     }
                 });
@@ -107,7 +124,7 @@ public class GamePanel extends JPanel {
                 super.paintComponent(g);
 
                 // Disegna le linee per i percorsi
-                for (ArrayList<Position> path : Game.getGame().getWorld().getPaths()) {
+                for (ArrayList<Position> path : Game.getGame().getWorld().getActivePaths()) {
                     drawStraightLine(g, path, Color.BLUE);
                 }
 
@@ -122,19 +139,18 @@ public class GamePanel extends JPanel {
                     g.setColor(c);
                     g.fillOval(factory.getPosition().x() * Settings.BLOCK_SIZE, factory.getPosition().y() * Settings.BLOCK_SIZE, Settings.BLOCK_SIZE,
                             Settings.BLOCK_SIZE);
+                    // Disegna l'id, la produzione e il numero di cyborgs all'interno della fabbrica
+                    //usa questo formato: (id, produzione, cyborgs)
+                    //centra il testo all'interno del cerchio
+                    g.setColor(Color.BLACK);
+                    g.drawString("(" + factory.getId() + ", " + factory.getProduction() + ", " + factory.getCyborgs() + ")",
+                            factory.getPosition().x() * Settings.BLOCK_SIZE + Settings.BLOCK_SIZE / 2 - 20,
+                            factory.getPosition().y() * Settings.BLOCK_SIZE + Settings.BLOCK_SIZE / 2);
                 }
 
                 // Disegna i proiettili
                 for (Projectile projectile : Game.getGame().getWorld().getProjectiles()) {
                     projectile.draw(g);
-                }
-
-                //per ogni blocco stampa le sue coordinate
-                for (int i = 0; i < Game.getGame().getWorld().getSize(); i++) {
-                    for (int j = 0; j < Game.getGame().getWorld().getSize(); j++) {
-                        g.setColor(Color.BLACK);
-                        g.drawString(i + "," + j, i * Settings.BLOCK_SIZE + Settings.BLOCK_SIZE / 2, j * Settings.BLOCK_SIZE + Settings.BLOCK_SIZE / 2);
-                    }
                 }
             }
         };
@@ -151,6 +167,13 @@ public class GamePanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+
+        if (Game.getGame().isEndGame()) {
+            System.out.println("GAME OVER!");
+            drawEnd("Game over!");
+            gameTimer.stop();
+            return;
+        }
     }
 
     private void drawStraightLine(Graphics g, ArrayList<Position> path, Color color) {
@@ -175,5 +198,23 @@ public class GamePanel extends JPanel {
         g2d.setStroke(new BasicStroke(2));
         g2d.drawLine(startX, startY, endX, endY);
     }
+
+    private void drawEnd(String message) {
+        this.removeAll(); // Rimuove tutti i componenti esistenti dal pannello
+
+        // Imposta il colore di sfondo del pannello
+        this.setBackground(Color.DARK_GRAY);
+
+        // Crea un nuovo JLabel con il messaggio specificato
+        JLabel endLabel = new JLabel(message);
+        endLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+        endLabel.setForeground(Color.WHITE);
+
+        // Aggiungi il JLabel al pannello e lo posiziona al centro
+        this.setLayout(new GridBagLayout());
+        this.add(endLabel, new GridBagConstraints());
+    }
+
+
 
 }
