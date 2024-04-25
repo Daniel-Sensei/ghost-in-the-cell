@@ -21,7 +21,7 @@ public class World {
     private ArrayList<Edge> edgesObject = new ArrayList<>();
 
     private ArrayList<ArrayList<Position>> paths = new ArrayList<>();
-    private ArrayList<Projectile> projectiles;
+    private ArrayList<Projectile> projectiles = new ArrayList<>();
 
     public World() {
         initializeBlocks();
@@ -35,7 +35,7 @@ public class World {
         initializeFactories();
         initializeEdges();
         initializePaths();
-        initializeProjectiles();
+        //initializeProjectiles();
     }
 
     private void initializeBlocks(){
@@ -258,7 +258,6 @@ public class World {
         return -1;
     }
 
-
     private boolean isInvalidPosition(Position p) {
         return p.x() < 0 || p.x() >= blocks.length || p.y() < 0 || p.y() >= blocks.length;
     }
@@ -290,8 +289,12 @@ public class World {
         return factories;
     }
 
-    public ArrayList<Pair<Position, Position>> getEdges() {
+    public ArrayList<Pair<Position, Position>> getEdgesPosition() {
         return edgesPosition;
+    }
+
+    public ArrayList<Edge> getEdgesObject() {
+        return edgesObject;
     }
 
     public ArrayList<ArrayList<Position>> getPaths() {
@@ -300,5 +303,9 @@ public class World {
 
     public ArrayList<Projectile> getProjectiles() {
         return projectiles;
+    }
+
+    public void addProjectile(Projectile p){
+        projectiles.add(p);
     }
 }

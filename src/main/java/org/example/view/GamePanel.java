@@ -70,6 +70,8 @@ public class GamePanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Crea un nuovo timer per muovere gradualmente i proiettili
+                Game.getGame().nextTurn();
+
                 Timer movementTimer = new Timer(10, new ActionListener() {
                     double count = 0.0;
                     @Override
@@ -84,7 +86,7 @@ public class GamePanel extends JPanel {
                         // Se tutti i proiettili hanno raggiunto la destinazione, ferma il timer
                         if (count >= 1.0) {
                             ((Timer) e.getSource()).stop();
-                            System.out.println("Turno successivo");
+                            System.out.println("Fine transizione proiettili");
                         }
                     }
                 });

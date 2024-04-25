@@ -17,7 +17,7 @@ public class EmbASPManager {
     private EmbASPManager() {
         DesktopService service = new DLV2DesktopService("lib/dlv2.exe");
         handler = new DesktopHandler(service);
-        OptionDescriptor option = new OptionDescriptor("-n 0");
+        OptionDescriptor option = new OptionDescriptor("-n 1");
         handler.addOption(option);
         program = new ASPInputProgram();
     }
