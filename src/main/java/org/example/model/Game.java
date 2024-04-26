@@ -157,6 +157,28 @@ public class Game {
             move.setCurrentTurn(move.getCurrentTurn() + 1);
 
             if (move.getCurrentTurn() >= move.getDistance()) {
+
+                //checks if there are troops that will reach the same factory in the same turn, in which case they'll just battle each other, eliminating the weaker one.
+                //experimental feature
+                //not completely tested
+                for (TransitTroop move2 : transitTroops){
+                    if(move.getF2() == move2.getF2() && move.getPlayer() != move2.getPlayer() && move2.getCurrentTurn() >= move2.getDistance()){
+                        if(move.getCyborgs() > move2.getCyborgs()){
+                            move.setCyborgs(move.getCyborgs() - move2.getCyborgs());
+                            move2.setCyborgs(0);
+                        }
+                        else if(move.getCyborgs() < move2.getCyborgs()){
+                            move2.setCyborgs(move2.getCyborgs() - move.getCyborgs());
+                            move.setCyborgs(0);
+                        }
+                        else{
+                            move.setCyborgs(0);
+                            move2.setCyborgs(0);
+                        }
+                    }
+                }
+
+
                 //PLAYER 1
                 if (move.getPlayer() == 1 && (world.getFactoryById(move.getF2()).getPlayer() == -1 || world.getFactoryById(move.getF2()).getPlayer() == 0)) {
                     //ATTACCO
