@@ -158,9 +158,14 @@ public class Game {
 
             if (move.getCurrentTurn() >= move.getDistance()) {
 
-                //checks if there are troops that will reach the same factory in the same turn, in which case they'll just battle each other, eliminating the weaker one.
-                //experimental feature
-                //not completely tested
+                //Checks if there are troops that will reach the same factory in the same turn,
+                // in which case they'll just battle each other, eliminating the weaker one;
+                // In case of a tie, both troops are eliminated.
+
+                //This is an experimental feature,
+                // and it has not been fully tested yet,
+                // so it might not work as intended.
+
                 for (TransitTroop move2 : transitTroops){
                     if(move.getF2() == move2.getF2() && move.getPlayer() != move2.getPlayer() && move2.getCurrentTurn() >= move2.getDistance()){
                         if(move.getCyborgs() > move2.getCyborgs()){
