@@ -54,7 +54,7 @@ public class GamePanel extends JPanel {
         bannerPanel.add(player2Label, BorderLayout.EAST);
 
         // Aggiungi un pulsante per andare al turno successivo al centro del banner
-        playPauseButton = new JButton("Stop");
+        playPauseButton = new JButton("Play");
         playPauseButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -144,7 +144,7 @@ public class GamePanel extends JPanel {
                 repaint();
             }
         });
-        gameTimer.start();
+        //gameTimer.start();
     }
 
     private void deleteOldProjectiles() {

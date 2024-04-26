@@ -242,7 +242,7 @@ public class Game {
                     TransitTroop transitTroop = (TransitTroop) obj;
                     System.out.println(transitTroop);
                     if(transitTroop.getCurrentTurn() == 0) {
-                        transitTroop.setDistance(world.getDistanceByFactoriesId(transitTroop.getF1(), transitTroop.getF2()) - 1);
+                        transitTroop.setDistance(world.getDistanceByFactoriesId(transitTroop.getF1(), transitTroop.getF2()));
                         if(player == 1)
                             tempMovesPlayer1.add(transitTroop);
                         else {
