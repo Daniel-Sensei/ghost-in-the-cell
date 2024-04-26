@@ -16,12 +16,6 @@ public class Projectile {
     private boolean reachedDestination;
     private int cyborgs;
 
-    public Projectile(ArrayList<Position> path, Color color) {
-        this.path = path;
-        this.color = color;
-        this.reachedDestination = false;
-    }
-
     public Projectile(ArrayList<Position> path, Color color, int cyborgs) {
         this.path = path;
         this.color = color;

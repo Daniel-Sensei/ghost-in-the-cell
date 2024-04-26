@@ -16,4 +16,6 @@ public class Settings {
     public final static int MIN_INITIAL_PRODUCTION = 1;
     public final static int MAX_INITIAL_PRODUCTION = 3;
     public final static int MAX_PRODUCTION = 3;
+
+    public final static int GAME_SPEED = 50;
 }

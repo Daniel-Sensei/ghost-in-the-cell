@@ -140,14 +140,6 @@ public class World {
         }
     }
 
-    private void initializeProjectiles(){
-        //Per ogni arco in edges genera un proiettile
-        projectiles = new ArrayList<>();
-        for (ArrayList<Position> path : paths) {
-            projectiles.add(new Projectile(path, Color.RED));
-        }
-    }
-
     private void calculateBidirectionalPath(Position start, Position end) {
         //System.out.println("Path tra " + start + " e " + end);
         ArrayList<Position> path = new ArrayList<>();
@@ -223,6 +215,7 @@ public class World {
                 //Aggiunge il prossimo passo del percorso senza considerare le factories
                 x += deltaX;
                 y += deltaY;
+                path.add(new Position(x, y));
             }
             distance++;
         }
