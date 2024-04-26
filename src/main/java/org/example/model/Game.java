@@ -179,36 +179,37 @@ public class Game {
                 }
 
 
-                //PLAYER 1
-                if (move.getPlayer() == 1 && (world.getFactoryById(move.getF2()).getPlayer() == -1 || world.getFactoryById(move.getF2()).getPlayer() == 0)) {
-                    //ATTACCO
-                    world.getFactoryById(move.getF2()).setCyborgs(world.getFactoryById(move.getF2()).getCyborgs() - move.getCyborgs());
-                    //CASO IN CUI IL GIOCATORE 1 VINCE
-                    if (world.getFactoryById(move.getF2()).getCyborgs() < 0) {
-                        world.getFactoryById(move.getF2()).setPlayer(1);
-                        world.getFactoryById(move.getF2()).setCyborgs(abs(world.getFactoryById(move.getF2()).getCyborgs()));
+                if (move.getCyborgs()>0){
+                    //PLAYER 1
+                    if (move.getPlayer() == 1 && (world.getFactoryById(move.getF2()).getPlayer() == -1 || world.getFactoryById(move.getF2()).getPlayer() == 0)) {
+                        //ATTACCO
+                        world.getFactoryById(move.getF2()).setCyborgs(world.getFactoryById(move.getF2()).getCyborgs() - move.getCyborgs());
+                        //CASO IN CUI IL GIOCATORE 1 VINCE
+                        if (world.getFactoryById(move.getF2()).getCyborgs() < 0) {
+                            world.getFactoryById(move.getF2()).setPlayer(1);
+                            world.getFactoryById(move.getF2()).setCyborgs(abs(world.getFactoryById(move.getF2()).getCyborgs()));
+                        }
+                    } else if (move.getPlayer() == 1 && world.getFactoryById(move.getF2()).getPlayer() == 1) {
+                        //RINFORZO
+                        world.getFactoryById(move.getF2()).setCyborgs(world.getFactoryById(move.getF2()).getCyborgs() + move.getCyborgs());
                     }
-                } else if (move.getPlayer() == 1 && world.getFactoryById(move.getF2()).getPlayer() == 1) {
-                    //RINFORZO
-                    world.getFactoryById(move.getF2()).setCyborgs(world.getFactoryById(move.getF2()).getCyborgs() + move.getCyborgs());
-                }
 
-                //PLAYER -1
-                if (move.getPlayer() == -1 && (world.getFactoryById(move.getF2()).getPlayer() == 1 || world.getFactoryById(move.getF2()).getPlayer() == 0)) {
-                    //ATTACCO
-                    world.getFactoryById(move.getF2()).setCyborgs(world.getFactoryById(move.getF2()).getCyborgs() - move.getCyborgs());
-                    //CASO IN CUI IL GIOCATORE -1 VINCE
-                    if (world.getFactoryById(move.getF2()).getCyborgs() < 0) {
-                        world.getFactoryById(move.getF2()).setPlayer(-1);
-                        world.getFactoryById(move.getF2()).setCyborgs(abs(world.getFactoryById(move.getF2()).getCyborgs()));
+                    //PLAYER -1
+                    if (move.getPlayer() == -1 && (world.getFactoryById(move.getF2()).getPlayer() == 1 || world.getFactoryById(move.getF2()).getPlayer() == 0)) {
+                        //ATTACCO
+                        world.getFactoryById(move.getF2()).setCyborgs(world.getFactoryById(move.getF2()).getCyborgs() - move.getCyborgs());
+                        //CASO IN CUI IL GIOCATORE -1 VINCE
+                        if (world.getFactoryById(move.getF2()).getCyborgs() < 0) {
+                            world.getFactoryById(move.getF2()).setPlayer(-1);
+                            world.getFactoryById(move.getF2()).setCyborgs(abs(world.getFactoryById(move.getF2()).getCyborgs()));
+                        }
+                    } else if (move.getPlayer() == -1 && world.getFactoryById(move.getF2()).getPlayer() == -1) {
+                        //RINFORZO
+                        world.getFactoryById(move.getF2()).setCyborgs(world.getFactoryById(move.getF2()).getCyborgs() + move.getCyborgs());
                     }
-                } else if (move.getPlayer() == -1 && world.getFactoryById(move.getF2()).getPlayer() == -1) {
-                    //RINFORZO
-                    world.getFactoryById(move.getF2()).setCyborgs(world.getFactoryById(move.getF2()).getCyborgs() + move.getCyborgs());
                 }
             }
         }
-
         // REMOVE TROOPS
         transitTroops.removeIf(move -> move.getCurrentTurn() == move.getDistance());
     }
