@@ -74,6 +74,7 @@ public class Game {
 
         updateFactoryCyborgReceived();
 
+        String filePath = "encodings/encoding1.asp";
         int player = 1; //player 1 starts
         for (int i = 0; i < 2; i++) {
             //CLEAR ALL
@@ -82,7 +83,7 @@ public class Game {
 
             // INPUT
             try {
-                passInputToOracle(player);
+                passInputToOracle(filePath, player);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -94,6 +95,7 @@ public class Game {
                 System.out.println("TempMovesPlayer2: " + tempMovesPlayer2);
 
                 if (player == -1){
+
                     if(checkValidMoves(tempMovesPlayer1, 1)){
                         moves.addAll(tempMovesPlayer1);
                         tempMovesPlayer1.clear();
@@ -108,6 +110,7 @@ public class Game {
                     else {
                         System.out.println("Mosse non valide player 2: " + tempMovesPlayer2);
                     }
+
                 }
 
                 // UPDATE WORLD
@@ -119,6 +122,7 @@ public class Game {
             } catch (ObjectNotValidException | IllegalAnnotationException e) {
                 e.printStackTrace();
             }
+            filePath = "encodings/encoding2.asp";
             player = -1; //change player
         }
 
@@ -187,8 +191,8 @@ public class Game {
         transitTroops.removeIf(move -> move.getCurrentTurn() == move.getDistance());
     }
 
-    private void passInputToOracle(int player) throws Exception {
-        String encoding = readEncoding("encodings/encoding.asp");
+    private void passInputToOracle(String filePath, int player) throws Exception {
+        String encoding = readEncoding(filePath);
         EmbASPManager.getInstance().getProgram().addProgram(encoding);
 
         // PLAYER
@@ -262,6 +266,9 @@ public class Game {
             //check player
             if (move.getPlayer() == 0) return false;
             if (move.getPlayer() != player) return false;
+
+            //check if cyborgs > 0
+            if (move.getCyborgs() <= 0) return false;
 
             //update cyborgsSent
             cyborgsSent.put(move.getF1(), cyborgsSent.getOrDefault(move.getF1(), 0) + move.getCyborgs());

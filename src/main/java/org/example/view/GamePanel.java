@@ -80,6 +80,13 @@ public class GamePanel extends JPanel {
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
 
+                // Load the image
+                ImageIcon imageIcon = new ImageIcon("assets/white-paper-background.jpg"); // replace with your image path
+                Image image = imageIcon.getImage();
+
+                // Draw the image on the panel
+                g.drawImage(image, 0, 0, this.getWidth(), this.getHeight(), this);
+
                 // Disegna le linee per i percorsi
                 for (ArrayList<Position> path : Game.getGame().getWorld().getActivePaths()) {
                     drawStraightLine(g, path, Color.BLACK);

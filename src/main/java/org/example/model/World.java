@@ -271,6 +271,7 @@ public class World {
     public boolean isEmpty(Position p) {
         return isType(p, Block.EMPTY);
     }
+
     public int getSize() {
         return blocks.length;
     }
