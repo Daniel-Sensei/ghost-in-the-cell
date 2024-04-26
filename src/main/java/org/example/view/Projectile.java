@@ -16,9 +16,18 @@ public class Projectile {
     private boolean reachedDestination;
     private int cyborgs;
 
+    private Image image;
+
     public Projectile(ArrayList<Position> path, Color color, int cyborgs) {
         this.path = path;
         this.color = color;
+        this.reachedDestination = false;
+        this.cyborgs = cyborgs;
+    }
+
+    public Projectile(ArrayList<Position> path, ImageIcon image, int cyborgs) {
+        this.path = path;
+        this.image = image.getImage();
         this.reachedDestination = false;
         this.cyborgs = cyborgs;
     }
@@ -46,7 +55,7 @@ public class Projectile {
     public void draw(Graphics g) {
         if (!reachedDestination) {
             int blockSize = Settings.BLOCK_SIZE;
-            int diameter = blockSize / 4; // Diametro del proiettile
+            int diameter = (int) (blockSize / 2.5); // Diametro del proiettile
             int xOffset = (blockSize - diameter) / 2; // Offset orizzontale per centrare il proiettile
             int yOffset = (blockSize - diameter) / 2; // Offset verticale per centrare il proiettile
 
@@ -54,20 +63,25 @@ public class Projectile {
             double x = interpolate(path.get(currentStep).x(), path.get(currentStep + 1).x(), stepProgress);
             double y = interpolate(path.get(currentStep).y(), path.get(currentStep + 1).y(), stepProgress);
 
-            g.setColor(color);
-            g.fillOval(
-                    (int) (x * blockSize + xOffset), // Aggiungi l'offset orizzontale
-                    (int) (y * blockSize + yOffset), // Aggiungi l'offset verticale
-                    diameter, diameter // Usa il diametro anziché la dimensione del blocco
-            );
+            // Disegna l'immagine al posto dell'ovale
+            if (image != null) {
+                g.drawImage(
+                        image,
+                        (int) (x * blockSize + xOffset), // Aggiungi l'offset orizzontale
+                        (int) (y * blockSize + yOffset), // Aggiungi l'offset verticale
+                        diameter, diameter, null
+                );
+            }
 
             // Disegna il numero di cyborgs all'interno del proiettile
             // Imposta il grassetto per rendere il testo più leggibile
             g.setColor(Color.BLACK);
-            g.setFont(new Font("Arial", Font.BOLD, 20));
-            g.drawString(String.valueOf(cyborgs), (int) (x * blockSize + blockSize / 2 - 10), (int) (y * blockSize + blockSize / 2 + 5));
+            g.setFont(new Font("Comic Sans MS", Font.BOLD, 18));
+            g.drawString(String.valueOf(cyborgs), (int) (x * blockSize + blockSize / 2 - 7), (int) (y * blockSize + blockSize / 2 + 5));
         }
     }
+
+
 
     // Funzione per l'interpolazione lineare tra due valori
     private double interpolate(double start, double end, double progress) {

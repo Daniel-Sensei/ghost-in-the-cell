@@ -92,25 +92,8 @@ public class GamePanel extends JPanel {
                     drawStraightLine(g, path, Color.BLACK);
                 }
 
-                // Disegna le fabbriche
-                for (Factory factory : Game.getGame().getWorld().getFactories()) {
-                    Color c = Color.GRAY;
-                    if (factory.getPlayer() == 1) {
-                        c = new Color(128, 0, 128);
-                    } else if (factory.getPlayer() == -1) {
-                        c = Color.ORANGE;
-                    }
-                    g.setColor(c);
-                    g.fillOval(factory.getPosition().x() * Settings.BLOCK_SIZE, factory.getPosition().y() * Settings.BLOCK_SIZE, Settings.BLOCK_SIZE,
-                            Settings.BLOCK_SIZE);
-                    // Disegna l'id, la produzione e il numero di cyborgs all'interno della fabbrica
-                    // Formato: (id, produzione, cyborgs)
-                    // Centra il testo all'interno del cerchio
-                    g.setColor(Color.BLACK);
-                    g.drawString("(" + factory.getId() + ", " + factory.getProduction() + ", " + factory.getCyborgs() + ")",
-                            factory.getPosition().x() * Settings.BLOCK_SIZE + Settings.BLOCK_SIZE / 2 - 20,
-                            factory.getPosition().y() * Settings.BLOCK_SIZE + Settings.BLOCK_SIZE / 2);
-                }
+                // Disegna le linee per i percorsi
+                drawFactories(g);
 
                 // Disegna i proiettili
                 for (Projectile projectile : Game.getGame().getWorld().getProjectiles()) {
@@ -126,6 +109,61 @@ public class GamePanel extends JPanel {
         matrixPanel.setBackground(Color.WHITE);
 
         return matrixPanel;
+    }
+
+    private void drawFactories(Graphics g){
+        // Disegna le fabbriche
+        for (Factory factory : Game.getGame().getWorld().getFactories()) {
+            String imageName = "factory-";
+            if(factory.getPlayer() == 1) {
+                imageName += "1-";
+            } else if(factory.getPlayer() == -1) {
+                imageName += "2-";
+            } else {
+                imageName += "0-";
+            }
+            imageName += factory.getProduction() + ".png";
+            // Disegna l'immagine della fabbrica
+            Image factoryImage = new ImageIcon("assets/" + imageName).getImage();
+            g.drawImage(factoryImage, factory.getPosition().x() * Settings.BLOCK_SIZE, factory.getPosition().y() * Settings.BLOCK_SIZE, Settings.BLOCK_SIZE, Settings.BLOCK_SIZE, null);
+
+            // Disegna il numero di cyborgs in un quadrato con bordi stondati
+            if(factory.getPlayer() == 1) {
+                g.setColor(new Color(120,215,217,255));
+            } else if(factory.getPlayer() == -1) {
+                g.setColor(Color.BLUE);
+            } else {
+                g.setColor(Color.GRAY);
+            }
+
+            int fontSize = 24;
+            Font font = new Font("Comic Sans MS", Font.BOLD, fontSize);
+
+            g.setFont(font);
+            FontMetrics fm = g.getFontMetrics();
+
+            // Calcola le dimensioni del testo
+            int cyborgs = factory.getCyborgs();
+            String cyborgsString = Integer.toString(cyborgs);
+            int stringWidth = fm.stringWidth(cyborgsString);
+            int stringHeight = fm.getHeight();
+
+            // Calcola le dimensioni del quadrato con bordi stondati
+            int squareWidth = stringWidth + 30; // Aggiungi spazio attorno al testo
+            int squareHeight = stringHeight + 10; // Aggiungi spazio attorno al testo
+
+            // Calcola le coordinate del rettangolo
+            int x = factory.getPosition().x() * Settings.BLOCK_SIZE + (Settings.BLOCK_SIZE - squareWidth) / 2;
+            int y = factory.getPosition().y() * Settings.BLOCK_SIZE + ((Settings.BLOCK_SIZE - squareHeight) / 2) + fm.getAscent() - 15;
+
+            // Disegna il rettangolo con bordi stondati
+            //g.fillRoundRect(x, y, squareWidth, squareHeight, 10, 10);
+
+            // Disegna il testo al centro del rettangolo
+            g.setColor(Color.WHITE);
+            g.drawString(cyborgsString, x + (squareWidth - stringWidth) / 2, y + (squareHeight - stringHeight) / 2 + fm.getAscent());
+
+        }
     }
 
     public void reset() {
@@ -238,7 +276,7 @@ public class GamePanel extends JPanel {
 
         Graphics2D g2d = (Graphics2D) g;
         g2d.setColor(color);
-        g2d.setStroke(new BasicStroke(2));
+        g2d.setStroke(new BasicStroke(1));
         g2d.drawLine(startX, startY, endX, endY);
     }
 

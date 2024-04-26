@@ -7,6 +7,7 @@ import org.example.model.objects.Factory;
 import org.example.model.objects.TransitTroop;
 import org.example.view.Projectile;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -330,13 +331,14 @@ public class World {
                     //find the path
                     for(ArrayList<Position> path : paths){
                         if(path.get(0).equals(factories.get(edge.getF1()).getPosition()) && path.get(path.size() - 1).equals(factories.get(edge.getF2()).getPosition())){
-                            Color color = null;
+                            ImageIcon image = null;
+                            int random = (int) (Math.random() * 4);
+                            String imagePath = "assets/ball-";
                             if (move.getPlayer() == 1)
-                                //color = light purple
-                                color = new Color(128, 0, 128);
+                                image = new ImageIcon(imagePath + "1-" + random + ".png");
                             else if (move.getPlayer() == -1)
-                                color = Color.ORANGE;
-                            Projectile projectile = new Projectile(path, color, move.getCyborgs());
+                                image = new ImageIcon(imagePath + "2-" + random + ".png");
+                            Projectile projectile = new Projectile(path, image, move.getCyborgs());
                             projectiles.add(projectile);
                             activePaths.add(path);
                         }
