@@ -94,14 +94,14 @@ public class Game {
                 System.out.println("TempMovesPlayer2: " + tempMovesPlayer2);
 
                 if (player == -1){
-                    if(checkValidMoves(tempMovesPlayer1)){
+                    if(checkValidMoves(tempMovesPlayer1, 1)){
                         moves.addAll(tempMovesPlayer1);
                         tempMovesPlayer1.clear();
                     }
                     else{
                         System.out.println("Mosse non valide player 1: " + tempMovesPlayer1);
                     }
-                    if(checkValidMoves(tempMovesPlayer2)){
+                    if(checkValidMoves(tempMovesPlayer2, -1)){
                         moves.addAll(tempMovesPlayer2);
                         tempMovesPlayer2.clear();
                     }
@@ -110,20 +110,12 @@ public class Game {
                     }
                 }
 
-                if (checkValidMoves(moves)) {
-                    // TODO OK
-                    //System.out.println("Mosse valide: " + moves);
+                // UPDATE WORLD
+                updateFactoryCyborgsSent(moves);
+                transitTroops.addAll(moves);
+                world.addProjectiles(moves);
+                turn++;
 
-                    // UPDATE WORLD
-                    updateFactoryCyborgsSent(moves);
-                    transitTroops.addAll(moves);
-                    world.addProjectiles(moves);
-                    turn++;
-                } else {
-                    // TODO ERROR (Turn skipped)
-                    System.out.println("Mosse non valide: " + moves);
-                    turn++;
-                }
             } catch (ObjectNotValidException | IllegalAnnotationException e) {
                 e.printStackTrace();
             }
@@ -161,7 +153,6 @@ public class Game {
             move.setCurrentTurn(move.getCurrentTurn() + 1);
 
             if (move.getCurrentTurn() >= move.getDistance()) {
-                System.out.println("ARRIVATO A DESTINAZIONE: " + move);
                 //PLAYER 1
                 if (move.getPlayer() == 1 && (world.getFactoryById(move.getF2()).getPlayer() == -1 || world.getFactoryById(move.getF2()).getPlayer() == 0)) {
                     //ATTACCO
@@ -263,13 +254,14 @@ public class Game {
         return result;
     }
 
-    private boolean checkValidMoves(ArrayList<TransitTroop> moves){
+    private boolean checkValidMoves(ArrayList<TransitTroop> moves, int player){
         if (moves.isEmpty()) return false;
 
         HashMap<Integer, Integer> cyborgsSent = new HashMap<>(); //the key is the factory id, the value is the total cyborgs sent
         for (TransitTroop move : moves) {
             //check player
             if (move.getPlayer() == 0) return false;
+            if (move.getPlayer() != player) return false;
 
             //update cyborgsSent
             cyborgsSent.put(move.getF1(), cyborgsSent.getOrDefault(move.getF1(), 0) + move.getCyborgs());
