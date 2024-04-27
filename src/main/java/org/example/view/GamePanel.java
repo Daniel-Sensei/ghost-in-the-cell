@@ -383,7 +383,7 @@ public class GamePanel extends JPanel {
             JLabel statsLabel = new JLabel(text);
             statsLabel.setFont(FontLoader.loadFont("assets/fonts/Chalkduster/Chalkduster.ttf", fontSize));
             statsLabel.setForeground(Color.WHITE);
-            statsLabel.setBounds(x, y, 200, 100);
+            statsLabel.setBounds(x, y, 250, 100);
             add(statsLabel);
         }
 
