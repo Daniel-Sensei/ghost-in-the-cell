@@ -10,6 +10,7 @@ import org.example.view.Projectile;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class World {
     private enum Block { EMPTY, FACTORY }
@@ -42,17 +43,22 @@ public class World {
     }
 
     private void initializeBlocks(){
-        blocks = new Block[Settings.WORLD_SIZE][Settings.WORLD_SIZE];
+        blocks = new Block[Settings.WORLD_SIZE_X][Settings.WORLD_SIZE_Y];
         for (int i = 0; i < blocks.length; i++) {
-            for (int j = 0; j < blocks.length; j++) {
+            for (int j = 0; j < blocks[0].length; j++) {
                 blocks[i][j] = Block.EMPTY;
             }
+            System.out.println("blocks[" + i + "]: " + Arrays.toString(blocks[i]));
         }
     }
 
     private void putRandomFactoriesOnMatrix(int N) {
         int count = 0;
         putRandomFactoriesOnMatrixRecursive(N, count);
+
+        for (int i = 0; i < blocks.length; i++) {
+            System.out.println("blocks[" + i + "]: " + Arrays.toString(blocks[i]));
+        }
     }
 
     private void putRandomFactoriesOnMatrixRecursive(int N, int count) {
@@ -60,7 +66,7 @@ public class World {
             return;
 
         int x = (int) (Math.random() * blocks.length);
-        int y = (int) (Math.random() * blocks.length);
+        int y = (int) (Math.random() * blocks[0].length);
         Position p = new Position(x, y);
         if (isEmpty(p) && !hasAdjacentFactory(p)) {
             setType(p, Block.FACTORY);
@@ -92,7 +98,7 @@ public class World {
         int initialProduction = (int) (Math.random() * (Settings.MIN_INITIAL_PRODUCTION + 1)) + Settings.MAX_INITIAL_PRODUCTION - Settings.MIN_INITIAL_PRODUCTION;
         int id = 0;
         for (int i = 0; i < blocks.length; i++) {
-            for (int j = 0; j < blocks.length; j++) {
+            for (int j = 0; j < blocks[0].length; j++) {
                 Position p = new Position(i, j);
                 if (isFactory(p)) {
                     Factory f = new Factory();
@@ -251,7 +257,7 @@ public class World {
     }
 
     private boolean isInvalidPosition(Position p) {
-        return p.x() < 0 || p.x() >= blocks.length || p.y() < 0 || p.y() >= blocks.length;
+        return p.x() < 0 || p.x() >= blocks.length || p.y() < 0 || p.y() >= blocks[0].length;
     }
 
     private boolean isType(Position p, Block block) {

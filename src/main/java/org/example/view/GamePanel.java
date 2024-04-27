@@ -19,11 +19,19 @@ public class GamePanel extends JPanel {
     private JPanel matrixPanel;
     private JPanel bannerPanel;
 
-    private String player1Name = "Player 1";
-    private String player2Name = "Player 2";
     private JButton playPauseButton;
 
     private boolean gameEnded = false;
+
+    public void switchGameTimer() {
+        if(gameTimer.isRunning()) {
+            gameTimer.stop();
+            playPauseButton.setText("Play");
+        } else {
+            gameTimer.start();
+            playPauseButton.setText("Stop");
+        }
+    }
 
     public GamePanel() {
         reset();
@@ -44,12 +52,12 @@ public class GamePanel extends JPanel {
         bannerPanel.setLayout(new BorderLayout());
 
         // Etichetta per il nome del giocatore 1 a sinistra
-        JLabel player1Label = new JLabel(player1Name);
+        JLabel player1Label = new JLabel(Settings.PLAYER_1_NAME);
         player1Label.setHorizontalAlignment(SwingConstants.LEFT);
         bannerPanel.add(player1Label, BorderLayout.WEST);
 
         // Etichetta per il nome del giocatore 2 a destra
-        JLabel player2Label = new JLabel(player2Name);
+        JLabel player2Label = new JLabel(Settings.PLAYER_2_NAME);
         player2Label.setHorizontalAlignment(SwingConstants.RIGHT);
         bannerPanel.add(player2Label, BorderLayout.EAST);
 
@@ -81,7 +89,7 @@ public class GamePanel extends JPanel {
                 super.paintComponent(g);
 
                 // Load the image
-                ImageIcon imageIcon = new ImageIcon("assets/white-paper-background.jpg"); // replace with your image path
+                ImageIcon imageIcon = new ImageIcon("assets/background.jpg"); // replace with your image path
                 Image image = imageIcon.getImage();
 
                 // Draw the image on the panel
@@ -253,8 +261,7 @@ public class GamePanel extends JPanel {
             frame.dispose();
 
             // Mostra la finestra del vincitore
-            String winnerName = "(VINCITORE)"; // Metodo per determinare il vincitore
-            new WinnerDialog(winnerName);
+            new WinnerDialog();
         }
 
     }
@@ -264,7 +271,7 @@ public class GamePanel extends JPanel {
             Position prev = path.get(0);
             for (int i = 1; i < path.size(); i++) {
                 Position current = path.get(i);
-                drawLinearLine(g, prev, current, color);
+                drawCrayonLine(g, prev, current, color);
                 prev = current;
             }
         }
@@ -282,19 +289,49 @@ public class GamePanel extends JPanel {
         g2d.drawLine(startX, startY, endX, endY);
     }
 
+    private void drawCrayonLine(Graphics g, Position start, Position end, Color color) {
+        int startX = start.x() * Settings.BLOCK_SIZE + Settings.BLOCK_SIZE / 2;
+        int startY = start.y() * Settings.BLOCK_SIZE + Settings.BLOCK_SIZE / 2;
+        int endX = end.x() * Settings.BLOCK_SIZE + Settings.BLOCK_SIZE / 2;
+        int endY = end.y() * Settings.BLOCK_SIZE + Settings.BLOCK_SIZE / 2;
+
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setColor(color);
+
+        // Crea un tratto personalizzato
+        float dash[] = {10.0f};
+        BasicStroke crayonStroke = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
+        g2d.setStroke(crayonStroke);
+
+        g2d.drawLine(startX, startY, endX, endY);
+    }
+
+
     private class WinnerDialog extends JFrame {
         private JLabel winnerLabel;
 
-        public WinnerDialog(String winnerName) {
+        public WinnerDialog() {
             setTitle("Game Over");
             setSize(300, 200);
             setLocationRelativeTo(null); // Centra la finestra
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-            winnerLabel = new JLabel("Il vincitore è: " + winnerName);
+            winnerLabel = new JLabel("Il vincitore è: " + Game.getGame().getWinner());
             add(winnerLabel);
 
             setVisible(true);
+        }
+    }
+
+    public void speedUpGame() {
+        if(Settings.GAME_SPEED > 10) {
+            Settings.GAME_SPEED -= 10;
+        }
+    }
+
+    public void slowDownGame() {
+        if(Settings.GAME_SPEED < 100) {
+            Settings.GAME_SPEED += 10;
         }
     }
 

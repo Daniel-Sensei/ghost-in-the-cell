@@ -14,17 +14,23 @@ public class GameListener extends KeyAdapter {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if(e.getKeyCode() == KeyEvent.VK_Q)
+        // ESC key to exit the game
+        if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
             System.exit(0);
 
-        /*
-        if(Game.getGame().isAlive() && !Game.getGame().win()) {
-            switch(e.getKeyCode()) {
-            case KeyEvent.VK_RIGHT -> Game.getGame().move(Game.MOVE_RIGHT);
-            }
-            gamePanel.repaint();
+        // SPACE key to pause the game
+        if(e.getKeyCode() == KeyEvent.VK_SPACE) {
+            gamePanel.switchGameTimer();
         }
 
-         */
+        // -> key to speed up the game
+        if(e.getKeyCode() == KeyEvent.VK_RIGHT) {
+            gamePanel.speedUpGame();
+        }
+
+        // <- key to slow down the game
+        if(e.getKeyCode() == KeyEvent.VK_LEFT) {
+            gamePanel.slowDownGame();
+        }
     }
 }

@@ -6,6 +6,7 @@ import it.unical.mat.embasp.languages.ObjectNotValidException;
 import it.unical.mat.embasp.languages.asp.ASPMapper;
 import it.unical.mat.embasp.languages.asp.AnswerSet;
 import it.unical.mat.embasp.languages.asp.AnswerSets;
+import org.example.config.Settings;
 import org.example.controller.EmbASPManager;
 import org.example.model.objects.Edge;
 import org.example.model.objects.Factory;
@@ -30,6 +31,8 @@ public class Game {
 
     private ArrayList<TransitTroop> tempMovesPlayer1 = new ArrayList<>();
     private ArrayList<TransitTroop> tempMovesPlayer2 = new ArrayList<>();
+
+    private String winner = "";
 
     private Game() {
         endGame = false;
@@ -330,10 +333,14 @@ public class Game {
     }
 
     private boolean checkEndGame() {
-        if(turn == 200) {
+        if(turn >= 200) {
             endGame = true;
+            setWinner();
             return true;
         }
+
+        if(checkMovesInTransit()) return false;
+
         int cont = 0;
         //check if player 1 or player 2 has all the factories
         for (Factory factory : world.getFactories()) {
@@ -341,6 +348,7 @@ public class Game {
         }
         if (cont == world.getFactories().size()) {
             endGame = true;
+            winner = Settings.PLAYER_1_NAME;
             return true;
         }
 
@@ -350,8 +358,39 @@ public class Game {
         }
         if (cont == world.getFactories().size()) {
             endGame = true;
+            winner = Settings.PLAYER_2_NAME;
             return true;
         }
         return false;
+    }
+
+    private boolean checkMovesInTransit(){
+        //controlla in transitTroops se ci sono mosse per il giocatore 1 o -1
+        //restituisce true se ci sono mosse per 1 solo giocatore o nessuna mossa
+        //restituisce false se ci sono mosse per entrambi i giocatori
+        boolean player1 = false;
+        boolean player2 = false;
+        for (TransitTroop move : transitTroops) {
+            if (move.getPlayer() == 1) player1 = true;
+            else if (move.getPlayer() == -1) player2 = true;
+        }
+        return !(player1 && player2);
+    }
+
+    private void setWinner(){
+        // set winner string to the player with the most number of cyborgs in the factories
+        int player1Cyborgs = 0;
+        int player2Cyborgs = 0;
+        for (Factory factory : world.getFactories()) {
+            if (factory.getPlayer() == 1) player1Cyborgs += factory.getCyborgs();
+            else if (factory.getPlayer() == -1) player2Cyborgs += factory.getCyborgs();
+        }
+        if (player1Cyborgs > player2Cyborgs) winner = Settings.PLAYER_1_NAME;
+        else if (player1Cyborgs < player2Cyborgs) winner = Settings.PLAYER_2_NAME;
+        else winner = "PAREGGIO";
+    }
+
+    public String getWinner() {
+        return winner;
     }
 }
