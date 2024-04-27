@@ -135,8 +135,6 @@ public class Game {
         //This function is called after projectiles end their movement
         //updateFactoryCyborgReceived();
 
-        checkEndGame();
-
     }
 
     private void produceCyborgs() {
@@ -227,6 +225,8 @@ public class Game {
         }
         // REMOVE TROOPS
         transitTroops.removeIf(move -> move.getCurrentTurn() == move.getDistance());
+
+        checkEndGame();
     }
 
     private void passInputToOracle(String filePath, int player) throws Exception {
@@ -339,14 +339,13 @@ public class Game {
             return true;
         }
 
-        if(checkMovesInTransit()) return false;
-
         int cont = 0;
         //check if player 1 or player 2 has all the factories
         for (Factory factory : world.getFactories()) {
             if (factory.getPlayer() == 1) cont++;
         }
         if (cont == world.getFactories().size()) {
+            if(checkMovesInTransit(-1)) return false;
             endGame = true;
             winner = Settings.PLAYER_1_NAME;
             return true;
@@ -357,6 +356,7 @@ public class Game {
             if (factory.getPlayer() == -1) cont++;
         }
         if (cont == world.getFactories().size()) {
+            if(checkMovesInTransit(1)) return false;
             endGame = true;
             winner = Settings.PLAYER_2_NAME;
             return true;
@@ -364,17 +364,12 @@ public class Game {
         return false;
     }
 
-    private boolean checkMovesInTransit(){
-        //controlla in transitTroops se ci sono mosse per il giocatore 1 o -1
-        //restituisce true se ci sono mosse per 1 solo giocatore o nessuna mossa
-        //restituisce false se ci sono mosse per entrambi i giocatori
-        boolean player1 = false;
-        boolean player2 = false;
+    private boolean checkMovesInTransit(int player){
+        //check if there are moves in transit for the player
         for (TransitTroop move : transitTroops) {
-            if (move.getPlayer() == 1) player1 = true;
-            else if (move.getPlayer() == -1) player2 = true;
+            if (move.getPlayer() == player) return true;
         }
-        return !(player1 && player2);
+        return false;
     }
 
     private void setWinner(){

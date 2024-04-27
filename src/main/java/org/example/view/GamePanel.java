@@ -24,12 +24,14 @@ public class GamePanel extends JPanel {
     private boolean gameEnded = false;
 
     public void switchGameTimer() {
-        if(gameTimer.isRunning()) {
-            gameTimer.stop();
-            playPauseButton.setText("Play");
-        } else {
-            gameTimer.start();
-            playPauseButton.setText("Stop");
+        if (!gameEnded) {
+            if (gameTimer.isRunning()) {
+                gameTimer.stop();
+                playPauseButton.setText("Play");
+            } else {
+                gameTimer.start();
+                playPauseButton.setText("Stop");
+            }
         }
     }
 
@@ -144,8 +146,8 @@ public class GamePanel extends JPanel {
                 g.setColor(Color.GRAY);
             }
 
-            int fontSize = 24;
-            Font font = new Font("Comic Sans MS", Font.BOLD, fontSize);
+            int fontSize = 30;
+            Font font = FontLoader.loadFont("assets/fonts/Chalkduster/Chalkduster.ttf", fontSize);
 
             g.setFont(font);
             FontMetrics fm = g.getFontMetrics();
@@ -257,8 +259,8 @@ public class GamePanel extends JPanel {
             gameEnded = true;
 
             // Chiudi la finestra del gioco attuale
-            JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
-            frame.dispose();
+            //JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+            //frame.dispose();
 
             // Mostra la finestra del vincitore
             new WinnerDialog();
@@ -307,19 +309,109 @@ public class GamePanel extends JPanel {
     }
 
 
-    private class WinnerDialog extends JFrame {
+    public class WinnerDialog extends JFrame {
         private JLabel winnerLabel;
 
         public WinnerDialog() {
-            setTitle("Game Over");
-            setSize(300, 200);
-            setLocationRelativeTo(null); // Centra la finestra
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-            winnerLabel = new JLabel("Il vincitore è: " + Game.getGame().getWinner());
-            add(winnerLabel);
-
+            setupFrame();
+            setupBackground();
+            setupPlayerLabels();
+            setupGameStats();
+            setupWinnerLabel();
             setVisible(true);
+        }
+
+        private void setupFrame() {
+            setTitle("Game Over");
+            setSize(900, 700);
+            setLocationRelativeTo(null);
+            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            setResizable(false);
+        }
+
+        private void setupBackground() {
+            ImageIcon imageIcon = new ImageIcon("assets/chalkboard-background.jpg");
+            Image image = imageIcon.getImage().getScaledInstance(900, 700, java.awt.Image.SCALE_SMOOTH);
+            setContentPane(new JLabel(new ImageIcon(image)));
+        }
+
+        private void setupPlayerLabels() {
+            addPlayerLabel(Settings.PLAYER_1_NAME, 50, 30);
+            addPlayerLabel(Settings.PLAYER_2_NAME, 560, 30);
+        }
+
+        private void addPlayerLabel(String playerName, int x, int y) {
+            JLabel playerLabel = new JLabel(playerName);
+            playerLabel.setFont(FontLoader.loadFont("assets/fonts/Chalkduster/Chalkduster.ttf", 34));
+            playerLabel.setForeground(Color.WHITE);
+            playerLabel.setBounds(x, y, 200, 50);
+            add(playerLabel);
+        }
+
+        private void setupGameStats() {
+            int[] player1Stats = getPlayerStats(1);
+            int[] player2Stats = getPlayerStats(-1);
+
+            addStatsLabel("Fabbriche: " + player1Stats[0], 50, 200);
+            addStatsLabel("Cyborgs: " + player1Stats[1], 50, 250);
+            addStatsLabel("Fabbriche: " + player2Stats[0], 630, 200);
+            addStatsLabel("Cyborgs: " + player2Stats[1], 630, 250);
+
+            addStatsLabel("Turni giocati:", 330, 150);
+            addStatsLabel(String.valueOf(Game.getGame().getTurn()), 330, 210, 100);
+        }
+
+        private int[] getPlayerStats(int player) {
+            int factories = 0;
+            int cyborgs = 0;
+
+            for (Factory factory : Game.getGame().getWorld().getFactories()) {
+                if(factory.getPlayer() == player) {
+                    factories++;
+                    cyborgs += factory.getCyborgs();
+                }
+            }
+
+            return new int[] {factories, cyborgs};
+        }
+
+        private void addStatsLabel(String text, int x, int y) {
+            addStatsLabel(text, x, y, 24);
+        }
+
+        private void addStatsLabel(String text, int x, int y, int fontSize) {
+            JLabel statsLabel = new JLabel(text);
+            statsLabel.setFont(FontLoader.loadFont("assets/fonts/Chalkduster/Chalkduster.ttf", fontSize));
+            statsLabel.setForeground(Color.WHITE);
+            statsLabel.setBounds(x, y, 200, 100);
+            add(statsLabel);
+        }
+
+        private void setupWinnerLabel() {
+            addStatsLabel("Vincitore:", 350, 400);
+
+            int[] player1Stats = getPlayerStats(1);
+            int[] player2Stats = getPlayerStats(-1);
+
+            String winnerText;
+            Color winnerColor = Color.WHITE;
+
+            if(player1Stats[1] > player2Stats[1]) {
+                winnerText = Settings.PLAYER_1_NAME;
+                //winnerColor = new Color(120, 215, 217);
+            } else if(player1Stats[1] < player2Stats[1]) {
+                winnerText = Settings.PLAYER_2_NAME;
+                //winnerColor = new Color(248, 151, 185);
+            } else {
+                winnerText = "Pareggio";
+                //winnerColor = Color.WHITE;
+            }
+
+            winnerLabel = new JLabel(winnerText);
+            winnerLabel.setFont(FontLoader.loadFont("assets/fonts/Chalkduster/Chalkduster.ttf", 70));
+            winnerLabel.setForeground(winnerColor);
+            winnerLabel.setBounds(240, 440, 800, 120);
+            add(winnerLabel);
         }
     }
 
