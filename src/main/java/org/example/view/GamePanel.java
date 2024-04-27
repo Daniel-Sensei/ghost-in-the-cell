@@ -336,15 +336,17 @@ public class GamePanel extends JPanel {
         }
 
         private void setupPlayerLabels() {
-            addPlayerLabel(Settings.PLAYER_1_NAME, 50, 30);
-            addPlayerLabel(Settings.PLAYER_2_NAME, 560, 30);
+            addPlayerLabel(Settings.PLAYER_1_NAME, 50, 30, 1);
+            addPlayerLabel(Settings.PLAYER_2_NAME, 465, 30, -1);
         }
 
-        private void addPlayerLabel(String playerName, int x, int y) {
+        private void addPlayerLabel(String playerName, int x, int y, int player) {
             JLabel playerLabel = new JLabel(playerName);
+            if(player == -1)
+                playerLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             playerLabel.setFont(FontLoader.loadFont("assets/fonts/Chalkduster/Chalkduster.ttf", 34));
             playerLabel.setForeground(Color.WHITE);
-            playerLabel.setBounds(x, y, 200, 50);
+            playerLabel.setBounds(x, y, 350, 50);
             add(playerLabel);
         }
 
@@ -354,11 +356,16 @@ public class GamePanel extends JPanel {
 
             addStatsLabel("Fabbriche: " + player1Stats[0], 50, 200);
             addStatsLabel("Cyborgs: " + player1Stats[1], 50, 250);
-            addStatsLabel("Fabbriche: " + player2Stats[0], 630, 200);
-            addStatsLabel("Cyborgs: " + player2Stats[1], 630, 250);
+            addStatsLabel("Fabbriche: " + player2Stats[0], 650, 200);
+            addStatsLabel("Cyborgs: " + player2Stats[1], 650, 250);
 
-            addStatsLabel("Turni giocati:", 330, 150);
-            addStatsLabel(String.valueOf(Game.getGame().getTurn()), 330, 210, 100);
+            addStatsLabel("Turni giocati:", 335, 150);
+            JLabel turnsLabel = new JLabel(Integer.toString(Game.getGame().getTurn()));
+            turnsLabel.setFont(FontLoader.loadFont("assets/fonts/Chalkduster/Chalkduster.ttf", 100));
+            turnsLabel.setForeground(Color.WHITE);
+            turnsLabel.setBounds(-25, 215, 900, 120);
+            turnsLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            add(turnsLabel);
         }
 
         private int[] getPlayerStats(int player) {
@@ -388,7 +395,7 @@ public class GamePanel extends JPanel {
         }
 
         private void setupWinnerLabel() {
-            addStatsLabel("Vincitore:", 350, 400);
+            addStatsLabel("Vincitore:", 360, 400);
 
             int[] player1Stats = getPlayerStats(1);
             int[] player2Stats = getPlayerStats(-1);
@@ -410,7 +417,8 @@ public class GamePanel extends JPanel {
             winnerLabel = new JLabel(winnerText);
             winnerLabel.setFont(FontLoader.loadFont("assets/fonts/Chalkduster/Chalkduster.ttf", 70));
             winnerLabel.setForeground(winnerColor);
-            winnerLabel.setBounds(240, 440, 800, 120);
+            winnerLabel.setBounds(-25, 440, 900, 120);
+            winnerLabel.setHorizontalAlignment(SwingConstants.CENTER);
             add(winnerLabel);
         }
     }
