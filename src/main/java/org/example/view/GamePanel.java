@@ -229,6 +229,8 @@ public class GamePanel extends JPanel {
                 if (count >= 1.0) {
                     ((Timer) e.getSource()).stop();
                     movementTimer = null;
+
+                    Game.getGame().updateFactoryCyborgReceived();
                     //System.out.println("Fine transizione proiettili");
                 }
             }

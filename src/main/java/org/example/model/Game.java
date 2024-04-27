@@ -67,12 +67,10 @@ public class Game {
     }
 
     public void nextTurn(){
-        checkEndGame();
+
 
         // UPDATE WORLD
         if(turn > 0) produceCyborgs();
-
-        updateFactoryCyborgReceived();
 
         String filePath = "encodings/encoding1.asp";
         int player = 1; //player 1 starts
@@ -127,6 +125,15 @@ public class Game {
         }
 
         System.out.println("Moves: " + transitTroops);
+
+        //Move troops
+        moveTroops();
+
+        //This function is called after projectiles end their movement
+        //updateFactoryCyborgReceived();
+
+        checkEndGame();
+
     }
 
     private void produceCyborgs() {
@@ -145,16 +152,16 @@ public class Game {
         }
     }
 
-    private void moveTroops(ArrayList<TransitTroop> moves) {
-        for (TransitTroop move : moves) {
+    private void moveTroops() {
+        for(TransitTroop move : transitTroops) {
             move.setCurrentTurn(move.getCurrentTurn() + 1);
         }
     }
 
-    private void updateFactoryCyborgReceived() {
+    public void updateFactoryCyborgReceived() {
         // UPDATE FACTORIES
         for(TransitTroop move : transitTroops){
-            move.setCurrentTurn(move.getCurrentTurn() + 1);
+            //move.setCurrentTurn(move.getCurrentTurn() + 1);
 
             if (move.getCurrentTurn() >= move.getDistance()) {
 
@@ -244,7 +251,7 @@ public class Game {
             EmbASPManager.getInstance().getProgram().addObjectInput(transitTroop);
         }
 
-        System.out.println(EmbASPManager.getInstance().getProgram().getPrograms());
+        //System.out.println(EmbASPManager.getInstance().getProgram().getPrograms());
         EmbASPManager.getInstance().getHandler().addProgram(EmbASPManager.getInstance().getProgram());
     }
 
@@ -263,7 +270,7 @@ public class Game {
                 for (Object obj : a.getAtoms()) {
                     if (!(obj instanceof TransitTroop)) continue;
                     TransitTroop transitTroop = (TransitTroop) obj;
-                    System.out.println(transitTroop);
+                    //System.out.println(transitTroop);
                     if(transitTroop.getCurrentTurn() == 0) {
                         transitTroop.setDistance(world.getDistanceByFactoriesId(transitTroop.getF1(), transitTroop.getF2()));
                         if(player == 1)
@@ -301,7 +308,7 @@ public class Game {
             //update cyborgsSent
             cyborgsSent.put(move.getF1(), cyborgsSent.getOrDefault(move.getF1(), 0) + move.getCyborgs());
         }
-        System.out.println(cyborgsSent);
+        //System.out.println(cyborgsSent);
 
         //check if the player has enough cyborgs to send
         for (Factory factory : world.getFactories()) {
