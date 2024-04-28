@@ -380,6 +380,9 @@ public class Game {
             if (factory.getPlayer() == 1) player1Cyborgs += factory.getCyborgs();
             else if (factory.getPlayer() == -1) player2Cyborgs += factory.getCyborgs();
         }
+        player1Cyborgs += getCyborgsInMovement(1);
+        player2Cyborgs += getCyborgsInMovement(-1);
+
         if (player1Cyborgs > player2Cyborgs) winner = Settings.PLAYER_1_NAME;
         else if (player1Cyborgs < player2Cyborgs) winner = Settings.PLAYER_2_NAME;
         else winner = "PAREGGIO";
@@ -387,5 +390,13 @@ public class Game {
 
     public String getWinner() {
         return winner;
+    }
+
+    public int getCyborgsInMovement(int player){
+        int cyborgs = 0;
+        for (TransitTroop move : transitTroops) {
+            if (move.getPlayer() == player) cyborgs += move.getCyborgs();
+        }
+        return cyborgs;
     }
 }

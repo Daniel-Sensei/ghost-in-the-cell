@@ -378,6 +378,7 @@ public class GamePanel extends JPanel {
                     cyborgs += factory.getCyborgs();
                 }
             }
+            cyborgs += Game.getGame().getCyborgsInMovement(player);
 
             return new int[] {factories, cyborgs};
         }

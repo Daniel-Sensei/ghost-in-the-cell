@@ -1,5 +1,8 @@
 %%%INPUT%%%
 
+%Player (1 or -1)
+player(P).
+
 %Current turn
 turn(N)
 
