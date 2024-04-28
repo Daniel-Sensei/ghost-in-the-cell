@@ -9,7 +9,7 @@ import java.awt.*;
 public class MainWindow {
     public static void launch() {
         JFrame f = new JFrame();
-        f.setSize(Settings.WINDOW_SIZE * 2 + 15, Settings.WINDOW_SIZE + 70); // 22 is the height of the title bar
+        f.setSize(Settings.WINDOW_SIZE * 2 - 50, Settings.WINDOW_SIZE + 70); // 22 is the height of the title bar
         // Set location of JFrame
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         f.setLocation(dim.width/2 - f.getSize().width/2, dim.height/2 - f.getSize().height/2);

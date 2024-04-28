@@ -9,7 +9,7 @@ public class Settings {
     public final static int WORLD_SIZE_X = 10;
     public final static int WORLD_SIZE_Y = 5;
 
-    public final static int BLOCK_SIZE = 140;
+    public final static int BLOCK_SIZE = 132;
 
     public final static int MIN_FACTORIES = 7;
     public final static int MAX_FACTORIES = 15;

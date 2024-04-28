@@ -21,6 +21,9 @@ public class GamePanel extends JPanel {
 
     private JButton playPauseButton;
 
+    private JPanel statsPanel = new JPanel();
+    private JLabel statsLabel = new JLabel();
+
     private boolean gameEnded = false;
 
     public void switchGameTimer() {
@@ -46,42 +49,50 @@ public class GamePanel extends JPanel {
         updateGamePanel();
     }
 
+
     private JPanel createBanner() {
-        bannerPanel = new JPanel();
-        bannerPanel.setBackground(Color.GRAY); // Imposta il colore di sfondo del banner
-
-        // Layout per il banner
-        bannerPanel.setLayout(new BorderLayout());
-
-        // Etichetta per il nome del giocatore 1 a sinistra
-        JLabel player1Label = new JLabel(Settings.PLAYER_1_NAME);
-        player1Label.setHorizontalAlignment(SwingConstants.LEFT);
-        bannerPanel.add(player1Label, BorderLayout.WEST);
-
-        // Etichetta per il nome del giocatore 2 a destra
-        JLabel player2Label = new JLabel(Settings.PLAYER_2_NAME);
-        player2Label.setHorizontalAlignment(SwingConstants.RIGHT);
-        bannerPanel.add(player2Label, BorderLayout.EAST);
-
-        // Aggiungi un pulsante per andare al turno successivo al centro del banner
-        playPauseButton = new JButton("Play");
-        playPauseButton.addActionListener(new ActionListener() {
+        bannerPanel = new JPanel(new BorderLayout()){
             @Override
-            public void actionPerformed(ActionEvent e) {
-                // Crea un nuovo timer per muovere gradualmente i proiettili
-                //startProjectilesAnimation();
-                if(gameTimer.isRunning()) {
-                    gameTimer.stop();
-                    playPauseButton.setText("Play");
-                } else {
-                    gameTimer.start();
-                    playPauseButton.setText("Stop");
-                }
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                updateStatsLabel();
             }
-        });
+        };
 
-        bannerPanel.add(playPauseButton, BorderLayout.CENTER);
+        addPlayerPanel(Settings.PLAYER_1_NAME, new Color(120, 215, 217), BorderLayout.WEST);
+        addPlayerPanel(Settings.PLAYER_2_NAME, new Color(248, 151, 185), BorderLayout.EAST);
+
+        statsPanel = new JPanel(new BorderLayout());
+        statsPanel.setBackground(Color.LIGHT_GRAY);
+        statsLabel = new JLabel();
+        statsLabel.setFont(FontLoader.loadFont("assets/fonts/Chalkduster/Chalkduster.ttf", 35));
+        statsLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        statsPanel.add(statsLabel, BorderLayout.CENTER);
+        bannerPanel.add(statsPanel, BorderLayout.CENTER);
+
         return bannerPanel;
+    }
+
+    private void addPlayerPanel(String playerName, Color color, String position) {
+        JPanel playerPanel = new JPanel(new BorderLayout());
+        playerPanel.setBackground(color);
+        JLabel playerLabel = new JLabel(playerName, SwingConstants.CENTER);
+        playerLabel.setFont(FontLoader.loadFont("assets/fonts/Chalkduster/Chalkduster.ttf", 30));
+        playerLabel.setForeground(Color.WHITE);
+        playerPanel.add(playerLabel, BorderLayout.CENTER);
+        playerPanel.setPreferredSize(new Dimension(480, 60));
+        bannerPanel.add(playerPanel, position);
+    }
+
+    private void updateStatsLabel() {
+        int cyborgs1 = Game.getGame().getTotCyborgs(1);
+        int cyborgs2 = Game.getGame().getTotCyborgs(-1);
+
+        Color color = (cyborgs1 > cyborgs2) ? new Color(120,215,217) :
+                (cyborgs1 < cyborgs2) ? new Color(248,151,185) : Color.LIGHT_GRAY;
+        statsPanel.setBackground(color);
+
+        statsLabel.setText(cyborgs1 + " - " + Game.getGame().getTurn() + " - " + cyborgs2);
     }
 
     private JPanel createMatrix() {

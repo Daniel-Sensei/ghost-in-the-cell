@@ -112,13 +112,12 @@ public class Game {
                         System.out.println("Mosse non valide player 2: " + tempMovesPlayer2);
                     }
 
+                    // UPDATE WORLD
+                    updateFactoryCyborgsSent(moves);
+                    transitTroops.addAll(moves);
+                    world.addProjectiles(moves);
+                    turn++;
                 }
-
-                // UPDATE WORLD
-                updateFactoryCyborgsSent(moves);
-                transitTroops.addAll(moves);
-                world.addProjectiles(moves);
-                turn++;
 
             } catch (ObjectNotValidException | IllegalAnnotationException e) {
                 e.printStackTrace();
@@ -390,6 +389,15 @@ public class Game {
 
     public String getWinner() {
         return winner;
+    }
+
+    public int getTotCyborgs(int player){
+        int cyborgs = 0;
+        for (Factory factory : world.getFactories()) {
+            if (factory.getPlayer() == player) cyborgs += factory.getCyborgs();
+        }
+        cyborgs += getCyborgsInMovement(player);
+        return cyborgs;
     }
 
     public int getCyborgsInMovement(int player){
