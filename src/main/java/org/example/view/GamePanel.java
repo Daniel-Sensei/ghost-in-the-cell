@@ -19,8 +19,6 @@ public class GamePanel extends JPanel {
     private JPanel matrixPanel;
     private JPanel bannerPanel;
 
-    private JButton playPauseButton;
-
     private JPanel statsPanel = new JPanel();
     private JLabel statsLabel = new JLabel();
 
@@ -30,10 +28,8 @@ public class GamePanel extends JPanel {
         if (!gameEnded) {
             if (gameTimer.isRunning()) {
                 gameTimer.stop();
-                playPauseButton.setText("Play");
             } else {
                 gameTimer.start();
-                playPauseButton.setText("Stop");
             }
         }
     }
