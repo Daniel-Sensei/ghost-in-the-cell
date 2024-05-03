@@ -314,7 +314,7 @@ public class Game {
 
         //check if the player has enough cyborgs to send
         for (Factory factory : world.getFactories()) {
-            if (factory.getPlayer() == 1) {
+            if (factory.getPlayer() == player) {
                 int cyborgs = factory.getCyborgs();
                 if (cyborgs < cyborgsSent.getOrDefault(factory.getId(), 0)) return false;
             }
