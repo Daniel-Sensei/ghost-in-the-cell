@@ -99,18 +99,19 @@ public class Game {
 
                     if(checkValidMoves(tempMovesPlayer1, 1)){
                         moves.addAll(tempMovesPlayer1);
-                        tempMovesPlayer1.clear();
                     }
                     else{
                         System.out.println("Mosse non valide player 1: " + tempMovesPlayer1);
                     }
                     if(checkValidMoves(tempMovesPlayer2, -1)){
                         moves.addAll(tempMovesPlayer2);
-                        tempMovesPlayer2.clear();
                     }
                     else {
                         System.out.println("Mosse non valide player 2: " + tempMovesPlayer2);
                     }
+
+                    tempMovesPlayer1.clear();
+                    tempMovesPlayer2.clear();
 
                     // UPDATE WORLD
                     updateFactoryCyborgsSent(moves);
