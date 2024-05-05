@@ -97,18 +97,24 @@ public class Game {
 
                 if (player == -1){
 
-                    if(checkValidMoves(tempMovesPlayer1, 1)){
-                        moves.addAll(tempMovesPlayer1);
-                    }
-                    else{
-                        System.out.println("Mosse non valide player 1: " + tempMovesPlayer1);
-                    }
-                    if(checkValidMoves(tempMovesPlayer2, -1)){
-                        moves.addAll(tempMovesPlayer2);
-                    }
-                    else {
-                        System.out.println("Mosse non valide player 2: " + tempMovesPlayer2);
-                    }
+                    // nuovo metodo
+                    moves.addAll(getValidMoves(tempMovesPlayer1, 1));
+                    moves.addAll(getValidMoves(tempMovesPlayer2, -1));
+
+
+                    // vecchio metodo
+                    // if(checkValidMoves(tempMovesPlayer1, 1)){
+                    //     moves.addAll(tempMovesPlayer1);
+                    // }
+                    // else{
+                    //     System.out.println("Mosse non valide player 1: " + tempMovesPlayer1);
+                    // }
+                    // if(checkValidMoves(tempMovesPlayer2, -1)){
+                    //     moves.addAll(tempMovesPlayer2);
+                    // }
+                    // else {
+                    //     System.out.println("Mosse non valide player 2: " + tempMovesPlayer2);
+                    // }
 
                     tempMovesPlayer1.clear();
                     tempMovesPlayer2.clear();
@@ -288,12 +294,39 @@ public class Game {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
             //Only the first answerSet is needed
             break;
         }
-
         return result;
+    }
+
+    private ArrayList<TransitTroop> getValidMoves (ArrayList<TransitTroop> moves, int player){
+        ArrayList<TransitTroop> validMoves=new ArrayList<TransitTroop>();
+
+        HashMap<Integer, Integer> factoriesActualCyborgs = new HashMap<>(); //the key is the factory id, the value is the total cyborgs
+        //registrare tutti i numeri dei cyborg attuali in ogni factory
+        for (Factory factory : world.getFactories()){
+            factoriesActualCyborgs.put(factory.getId(), factory.getCyborgs());
+        }
+
+        //controlli effettivi
+        for (TransitTroop move : moves) {
+            //check player
+            if (move.getPlayer() == 0) continue;
+            if (move.getPlayer() != player) continue;
+
+            //check if cyborgs > 0
+            if (move.getCyborgs() <= 0) continue;
+
+            //controlli su la disponibilità di cyborg e aggiornamento della hashmap di controllo
+            if (factoriesActualCyborgs.get(move.getF1())-move.getCyborgs()<0) continue;
+            else factoriesActualCyborgs.put(move.getF1(), factoriesActualCyborgs.get(move.getF1()) - move.getCyborgs());
+
+            //aggiunta all'array di mosse effettuabili
+            validMoves.add(move);
+        }
+        //return delle mosse valide
+        return validMoves;
     }
 
     private boolean checkValidMoves(ArrayList<TransitTroop> moves, int player){
