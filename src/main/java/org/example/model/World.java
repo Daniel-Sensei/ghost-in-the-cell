@@ -116,6 +116,9 @@ public class World {
                         f.setPlayer(0);
                         f.setCyborgs((int) (Math.random() * (Settings.MAX_NEUTRAL_TROOPS)) + Settings.MIN_NEUTRAL_TROOPS);
                         f.setProduction((int) (Math.random() * (Settings.MAX_PRODUCTION + 1)));
+                        if(f.getProduction() == 0){
+                            f.setCyborgs(0);
+                        }
                     }
                     id++;
 
