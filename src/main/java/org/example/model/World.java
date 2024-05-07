@@ -104,11 +104,11 @@ public class World {
                     Factory f = new Factory();
 
                     f.setId(id);
-                    if(id == 0){
+                    if(id == Settings.SPAWN_OFFSET){
                         f.setPlayer(1);
                         f.setCyborgs(initialTroops);
                         f.setProduction(initialProduction);
-                    } else if (id == numFactories - 1){
+                    } else if (id == numFactories - 1 - Settings.SPAWN_OFFSET){
                         f.setPlayer(-1);
                         f.setCyborgs(initialTroops);
                         f.setProduction(initialProduction);
@@ -129,6 +129,46 @@ public class World {
             }
         }
         System.out.println("Factories: " + factories);
+        if(!checkFairness()){
+            factories = null;
+            initializeFactories();
+        }
+    }
+
+    private boolean checkFairness(){
+        //check the first half of the world
+        int prodHalf1=0;
+        int prodHalf2=0;
+        for (int i = 0; i < blocks.length / 2; i++) {
+            for (int j = 0; j < blocks[0].length; j++) {
+                Position p = new Position(i, j);
+                if (isFactory(p)) {
+                    //find the factory in factories by position and sum the production into prodHalf1
+                    for (Factory f : factories) {
+                        if(f.getPosition().equals(p)){
+                            prodHalf1 += f.getProduction();
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println("prodHalf1: " + prodHalf1);
+        //check the second half of the world
+        for (int i = blocks.length / 2; i < blocks.length; i++) {
+            for (int j = 0; j < blocks[0].length; j++) {
+                Position p = new Position(i, j);
+                if (isFactory(p)) {
+                    //find the factory in factories by position and sum the production into prodHalf2
+                    for (Factory f : factories) {
+                        if(f.getPosition().equals(p)){
+                            prodHalf2 += f.getProduction();
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println("prodHalf2: " + prodHalf2);
+        return prodHalf1 == prodHalf2;
     }
 
     private void initializeEdges(){

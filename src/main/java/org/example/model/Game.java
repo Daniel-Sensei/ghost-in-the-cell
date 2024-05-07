@@ -266,7 +266,7 @@ public class Game {
         ArrayList<TransitTroop> result = new ArrayList<>();
 
         AnswerSets answersets = (AnswerSets) output;
-        for(AnswerSet a: answersets.getAnswersets()) {
+        for(AnswerSet a: answersets.getOptimalAnswerSets()) {
 
             //System.out.println(a.toString());
             try {

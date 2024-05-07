@@ -14,6 +14,8 @@ public class Settings {
     public final static int MIN_FACTORIES = 7;
     public final static int MAX_FACTORIES = 15;
 
+    public final static int SPAWN_OFFSET = 2;
+
     public final static int MIN_INITIAL_TROOPS = 15;
     public final static int MAX_INITIAL_TROOPS = 30;
     public final static int MIN_NEUTRAL_TROOPS = 1;
