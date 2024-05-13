@@ -8,6 +8,7 @@ import it.unical.mat.embasp.languages.asp.AnswerSet;
 import it.unical.mat.embasp.languages.asp.AnswerSets;
 import org.example.config.Settings;
 import org.example.controller.EmbASPManager;
+import org.example.model.objects.ArrivingTroop;
 import org.example.model.objects.Edge;
 import org.example.model.objects.Factory;
 import org.example.model.objects.TransitTroop;
@@ -251,9 +252,11 @@ public class Game {
 
         // TROOPS
         for (TransitTroop transitTroop : transitTroops) {
-            EmbASPManager.getInstance().getProgram().addObjectInput(transitTroop);
+            ArrivingTroop arrivingTroop = new ArrivingTroop(transitTroop);
+            EmbASPManager.getInstance().getProgram().addObjectInput(arrivingTroop);
         }
 
+        //if(player == 1)
         //System.out.println(EmbASPManager.getInstance().getProgram().getPrograms());
         EmbASPManager.getInstance().getHandler().addProgram(EmbASPManager.getInstance().getProgram());
     }
@@ -268,7 +271,7 @@ public class Game {
         AnswerSets answersets = (AnswerSets) output;
         for(AnswerSet a: answersets.getOptimalAnswerSets()) {
 
-            //System.out.println(a.toString());
+            System.out.println(a.toString());
             try {
                 for (Object obj : a.getAtoms()) {
                     if (!(obj instanceof TransitTroop)) continue;
