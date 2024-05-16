@@ -1,10 +1,7 @@
 package org.example.config;
 
-import org.example.model.World;
-
 public class Settings {
     public final static int WINDOW_SIZE = 700;
-    public final static int WORLD_SIZE = 7;
 
     public final static int WORLD_SIZE_X = 10;
     public final static int WORLD_SIZE_Y = 5;
@@ -33,4 +30,7 @@ public class Settings {
 
     public final static String PLAYER_1_NAME = "Player 1";
     public final static String PLAYER_2_NAME = "Player 2";
+
+    public final static String PLAYER_1_FILE = "encoding1.asp";
+    public final static String PLAYER_2_FILE = "encoding2.asp";
 }

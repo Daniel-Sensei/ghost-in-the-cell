@@ -104,32 +104,27 @@ public class GamePanel extends JPanel {
                 // Draw the image on the panel
                 g.drawImage(image, 0, 0, this.getWidth(), this.getHeight(), this);
 
-                // Disegna le linee per i percorsi
+                // Draw lines for active paths
                 for (ArrayList<Position> path : Game.getGame().getWorld().getActivePaths()) {
                     drawStraightLine(g, path, Color.BLACK);
                 }
 
-                // Disegna le linee per i percorsi
                 drawFactories(g);
 
-                // Disegna i proiettili
+                // Draw projectiles
                 for (Projectile projectile : Game.getGame().getWorld().getProjectiles()) {
                     projectile.draw(g);
                 }
             }
         };
 
-        // Imposta il layout del pannello della matrice come GridLayout con una riga e una colonna
         matrixPanel.setLayout(new GridLayout(1, 1));
-
-        // Imposta il colore di sfondo del pannello della matrice
         matrixPanel.setBackground(Color.WHITE);
 
         return matrixPanel;
     }
 
     private void drawFactories(Graphics g){
-        // Disegna le fabbriche
         for (Factory factory : Game.getGame().getWorld().getFactories()) {
             String imageName = "factory-";
             if(factory.getPlayer() == 1) {
@@ -140,11 +135,11 @@ public class GamePanel extends JPanel {
                 imageName += "0-";
             }
             imageName += factory.getProduction() + ".png";
-            // Disegna l'immagine della fabbrica
+            // IMAGES
             Image factoryImage = new ImageIcon("assets/" + imageName).getImage();
             g.drawImage(factoryImage, factory.getPosition().x() * Settings.BLOCK_SIZE, factory.getPosition().y() * Settings.BLOCK_SIZE, Settings.BLOCK_SIZE, Settings.BLOCK_SIZE, null);
 
-            // Disegna il numero di cyborgs in un quadrato con bordi stondati
+            // CYBORGS
             if(factory.getPlayer() == 1) {
                 g.setColor(new Color(120,215,217,255));
             } else if(factory.getPlayer() == -1) {
@@ -159,27 +154,22 @@ public class GamePanel extends JPanel {
             g.setFont(font);
             FontMetrics fm = g.getFontMetrics();
 
-            // Calcola le dimensioni del testo
+            // Font size
             int cyborgs = factory.getCyborgs();
             String cyborgsString = Integer.toString(cyborgs);
             int stringWidth = fm.stringWidth(cyborgsString);
             int stringHeight = fm.getHeight();
 
-            // Calcola le dimensioni del quadrato con bordi stondati
             int squareWidth = stringWidth + 30; // Aggiungi spazio attorno al testo
             int squareHeight = stringHeight + 10; // Aggiungi spazio attorno al testo
 
-            // Calcola le coordinate del rettangolo
+            // Coordinates
             int x = factory.getPosition().x() * Settings.BLOCK_SIZE + (Settings.BLOCK_SIZE - squareWidth) / 2;
             int y = factory.getPosition().y() * Settings.BLOCK_SIZE + ((Settings.BLOCK_SIZE - squareHeight) / 2) + fm.getAscent() - 15;
 
-            // Disegna il rettangolo con bordi stondati
-            //g.fillRoundRect(x, y, squareWidth, squareHeight, 10, 10);
-
-            // Disegna il testo al centro del rettangolo
+            // Draw Text
             g.setColor(Color.WHITE);
             g.drawString(cyborgsString, x + (squareWidth - stringWidth) / 2, y + (squareHeight - stringHeight) / 2 + fm.getAscent());
-
         }
     }
 
@@ -188,7 +178,6 @@ public class GamePanel extends JPanel {
     }
 
     private void updateGamePanel() {
-        // Imposta il timer
         int delay = 1000/30; // 30 FPS
         gameTimer = new Timer(delay, e -> {
             // Delete old projectiles
@@ -198,7 +187,6 @@ public class GamePanel extends JPanel {
             deleteOldActivePaths();
 
             if(movementTimer == null) {
-                // Crea un nuovo timer per muovere gradualmente i proiettili
                 startProjectilesAnimation();
             }
 
@@ -206,7 +194,6 @@ public class GamePanel extends JPanel {
                 repaint();
             }
         });
-        //gameTimer.start();
     }
 
     private void deleteOldProjectiles() {
@@ -235,24 +222,21 @@ public class GamePanel extends JPanel {
             double count = 0.0;
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Itera attraverso tutti i proiettili e muovili di un passo
+                // Move all projectiles
                 for (Projectile projectile : Game.getGame().getWorld().getProjectiles()) {
                     projectile.move();
                 }
-                // Richiama repaint() per aggiornare il pannello dopo ogni movimento
                 repaint();
                 count += 0.05;
-                // Se tutti i proiettili hanno raggiunto la destinazione, ferma il timer
+                // If the transition is completed, stop the timer
                 if (count >= 1.0) {
                     ((Timer) e.getSource()).stop();
                     movementTimer = null;
 
                     Game.getGame().updateFactoryCyborgReceived();
-                    //System.out.println("Fine transizione proiettili");
                 }
             }
         });
-        // Avvia il timer per muovere gradualmente i proiettili
         movementTimer.start();
     }
 
@@ -265,11 +249,7 @@ public class GamePanel extends JPanel {
             gameTimer.stop();
             gameEnded = true;
 
-            // Chiudi la finestra del gioco attuale
-            //JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
-            //frame.dispose();
-
-            // Mostra la finestra del vincitore
+            // WINNER DIALOG
             new WinnerDialog();
         }
 
@@ -307,7 +287,6 @@ public class GamePanel extends JPanel {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setColor(color);
 
-        // Crea un tratto personalizzato
         float dash[] = {10.0f};
         BasicStroke crayonStroke = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
         g2d.setStroke(crayonStroke);
@@ -441,28 +420,6 @@ public class GamePanel extends JPanel {
         if(Settings.GAME_SPEED < 100) {
             Settings.GAME_SPEED += 10;
         }
-    }
-
-    private void drawEnd(Graphics g, String message) {
-        // Disegna un rettangolo grigio che copre l'intero pannello
-        g.setColor(Color.DARK_GRAY);
-        g.fillRect(0, 0, getWidth(), getHeight());
-
-        // Imposta il font e il colore per il testo
-        g.setFont(new Font("Arial", Font.PLAIN, 20));
-        g.setColor(Color.WHITE);
-
-        // Ottieni le dimensioni del testo per centrarlo sul pannello
-        FontMetrics fm = g.getFontMetrics();
-        int messageWidth = fm.stringWidth(message);
-        int messageHeight = fm.getHeight();
-
-        // Calcola le coordinate per centrare il testo
-        int x = (getWidth() - messageWidth) / 2;
-        int y = (getHeight() - messageHeight) / 2 + fm.getAscent();
-
-        // Disegna il testo centrato sul pannello
-        g.drawString(message, x, y);
     }
 
 }

@@ -1,6 +1,5 @@
 package org.example.controller;
 
-import org.example.model.Game;
 import org.example.view.GamePanel;
 
 import java.awt.event.KeyAdapter;

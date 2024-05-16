@@ -22,7 +22,6 @@ import java.util.HashMap;
 import static java.lang.Math.abs;
 
 public class Game {
-    public final static int FORWARD = 0;
     private static Game game = null;
     private boolean endGame;
     private final World world;
@@ -56,7 +55,6 @@ public class Game {
             FileReader fileReader = new FileReader(filePath);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
 
-            //put all the lines of the file in the string encoding
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 encoding += line + "\n";
@@ -65,18 +63,15 @@ public class Game {
             bufferedReader.close();
         } catch (IOException e) {
             e.printStackTrace();
-            // Handle file reading error
         }
         return encoding;
     }
 
     public void nextTurn(){
-
-
         // UPDATE WORLD
         if(turn > 0) produceCyborgs();
 
-        String filePath = "encodings/encoding1.asp";
+        String filePath = "encodings/" + Settings.PLAYER_1_FILE;
         int player = 1; //player 1 starts
         for (int i = 0; i < 2; i++) {
             //CLEAR ALL
@@ -124,7 +119,7 @@ public class Game {
             } catch (ObjectNotValidException | IllegalAnnotationException e) {
                 e.printStackTrace();
             }
-            filePath = "encodings/encoding2.asp";
+            filePath = "encodings/" + Settings.PLAYER_2_FILE;
             player = -1; //change player
         }
 
@@ -132,10 +127,6 @@ public class Game {
 
         //Move troops
         moveTroops();
-
-        //This function is called after projectiles end their movement
-        //updateFactoryCyborgReceived();
-
     }
 
     private void produceCyborgs() {
@@ -163,17 +154,12 @@ public class Game {
     public void updateFactoryCyborgReceived() {
         // UPDATE FACTORIES
         for(TransitTroop move : transitTroops){
-            //move.setCurrentTurn(move.getCurrentTurn() + 1);
 
             if (move.getCurrentTurn() >= move.getDistance()) {
 
                 //Checks if there are troops that will reach the same factory in the same turn,
                 // in which case they'll just battle each other, eliminating the weaker one;
                 // In case of a tie, both troops are eliminated.
-
-                //This is an experimental feature,
-                // and it has not been fully tested yet,
-                // so it might not work as intended.
 
                 for (TransitTroop move2 : transitTroops){
                     if(move.getF2() == move2.getF2() && move.getPlayer() != move2.getPlayer() && move2.getCurrentTurn() >= move2.getDistance()){
@@ -196,29 +182,29 @@ public class Game {
                 if (move.getCyborgs()>0){
                     //PLAYER 1
                     if (move.getPlayer() == 1 && (world.getFactoryById(move.getF2()).getPlayer() == -1 || world.getFactoryById(move.getF2()).getPlayer() == 0)) {
-                        //ATTACCO
+                        //ATK
                         world.getFactoryById(move.getF2()).setCyborgs(world.getFactoryById(move.getF2()).getCyborgs() - move.getCyborgs());
-                        //CASO IN CUI IL GIOCATORE 1 VINCE
+                        //Player 1 wins
                         if (world.getFactoryById(move.getF2()).getCyborgs() < 0) {
                             world.getFactoryById(move.getF2()).setPlayer(1);
                             world.getFactoryById(move.getF2()).setCyborgs(abs(world.getFactoryById(move.getF2()).getCyborgs()));
                         }
                     } else if (move.getPlayer() == 1 && world.getFactoryById(move.getF2()).getPlayer() == 1) {
-                        //RINFORZO
+                        //Support
                         world.getFactoryById(move.getF2()).setCyborgs(world.getFactoryById(move.getF2()).getCyborgs() + move.getCyborgs());
                     }
 
                     //PLAYER -1
                     if (move.getPlayer() == -1 && (world.getFactoryById(move.getF2()).getPlayer() == 1 || world.getFactoryById(move.getF2()).getPlayer() == 0)) {
-                        //ATTACCO
+                        //ATK
                         world.getFactoryById(move.getF2()).setCyborgs(world.getFactoryById(move.getF2()).getCyborgs() - move.getCyborgs());
-                        //CASO IN CUI IL GIOCATORE -1 VINCE
+                        //Player -1 wins
                         if (world.getFactoryById(move.getF2()).getCyborgs() < 0) {
                             world.getFactoryById(move.getF2()).setPlayer(-1);
                             world.getFactoryById(move.getF2()).setCyborgs(abs(world.getFactoryById(move.getF2()).getCyborgs()));
                         }
                     } else if (move.getPlayer() == -1 && world.getFactoryById(move.getF2()).getPlayer() == -1) {
-                        //RINFORZO
+                        //Support
                         world.getFactoryById(move.getF2()).setCyborgs(world.getFactoryById(move.getF2()).getCyborgs() + move.getCyborgs());
                     }
                 }
@@ -256,8 +242,7 @@ public class Game {
             EmbASPManager.getInstance().getProgram().addObjectInput(arrivingTroop);
         }
 
-        //if(player == 1)
-        //System.out.println(EmbASPManager.getInstance().getProgram().getPrograms());
+        //if(player == 1) {System.out.println(EmbASPManager.getInstance().getProgram().getPrograms());}
         EmbASPManager.getInstance().getHandler().addProgram(EmbASPManager.getInstance().getProgram());
     }
 
@@ -276,7 +261,6 @@ public class Game {
                 for (Object obj : a.getAtoms()) {
                     if (!(obj instanceof TransitTroop)) continue;
                     TransitTroop transitTroop = (TransitTroop) obj;
-                    //System.out.println(transitTroop);
                     if(transitTroop.getCurrentTurn() == 0) {
                         transitTroop.setDistance(world.getDistanceByFactoriesId(transitTroop.getF1(), transitTroop.getF2()));
                         if(player == 1)
@@ -285,7 +269,6 @@ public class Game {
                             transitTroop.setPlayer(player);
                             tempMovesPlayer2.add(transitTroop);
                         }
-                        //result.add(transitTroop);
                     }
                 }
             } catch (Exception e) {
@@ -314,7 +297,6 @@ public class Game {
             //update cyborgsSent
             cyborgsSent.put(move.getF1(), cyborgsSent.getOrDefault(move.getF1(), 0) + move.getCyborgs());
         }
-        //System.out.println(cyborgsSent);
 
         //check if the player has enough cyborgs to send
         for (Factory factory : world.getFactories()) {

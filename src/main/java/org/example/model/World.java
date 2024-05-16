@@ -8,7 +8,6 @@ import org.example.model.objects.TransitTroop;
 import org.example.view.Projectile;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -32,14 +31,12 @@ public class World {
 
         //Set the number of factories
         numFactories = (int) (Math.random() * Settings.MIN_FACTORIES + 1) + Settings.MAX_FACTORIES - Settings.MIN_FACTORIES;
-        System.out.println("numFactories: " + numFactories);
 
         putRandomFactoriesOnMatrix(numFactories);
 
         initializeFactories();
         initializeEdges();
         initializePaths();
-        //initializeProjectiles();
     }
 
     private void initializeBlocks(){
@@ -48,17 +45,12 @@ public class World {
             for (int j = 0; j < blocks[0].length; j++) {
                 blocks[i][j] = Block.EMPTY;
             }
-            System.out.println("blocks[" + i + "]: " + Arrays.toString(blocks[i]));
         }
     }
 
     private void putRandomFactoriesOnMatrix(int N) {
         int count = 0;
         putRandomFactoriesOnMatrixRecursive(N, count);
-
-        for (int i = 0; i < blocks.length; i++) {
-            System.out.println("blocks[" + i + "]: " + Arrays.toString(blocks[i]));
-        }
     }
 
     private void putRandomFactoriesOnMatrixRecursive(int N, int count) {
@@ -92,7 +84,6 @@ public class World {
     }
 
     private void initializeFactories(){
-        //Crea un array di factories
         factories = new ArrayList<>();
         int initialTroops = (int) (Math.random() * (Settings.MIN_INITIAL_TROOPS + 1)) + Settings.MAX_INITIAL_TROOPS - Settings.MIN_INITIAL_TROOPS;
         int initialProduction = (int) (Math.random() * (Settings.MIN_INITIAL_PRODUCTION + 1)) + Settings.MAX_INITIAL_PRODUCTION - Settings.MIN_INITIAL_PRODUCTION;
@@ -128,7 +119,6 @@ public class World {
                 }
             }
         }
-        System.out.println("Factories: " + factories);
         if(!checkFairness()){
             factories = null;
             initializeFactories();
@@ -136,7 +126,7 @@ public class World {
     }
 
     private boolean checkFairness(){
-        //check the first half of the world
+        //Check the first half of the world
         int prodHalf1=0;
         int prodHalf2=0;
         for (int i = 0; i < blocks.length / 2; i++) {
@@ -152,8 +142,8 @@ public class World {
                 }
             }
         }
-        System.out.println("prodHalf1: " + prodHalf1);
-        //check the second half of the world
+
+        //Check the second half of the world
         for (int i = blocks.length / 2; i < blocks.length; i++) {
             for (int j = 0; j < blocks[0].length; j++) {
                 Position p = new Position(i, j);
@@ -167,19 +157,14 @@ public class World {
                 }
             }
         }
-        System.out.println("prodHalf2: " + prodHalf2);
         return prodHalf1 == prodHalf2;
     }
 
     private void initializeEdges(){
-        //Imposta collegamenti tra tutte le factories come coppie <startPosition, endPosition>
-        //I collegamenti non sono orientati, quindi se c'è un collegamento tra A e B, c'è anche tra B e A
-        //quello tra B e A si omette
         edgesPosition = new ArrayList<>();
         for (int i = 0; i < factories.size(); i++) {
             for (int j = i + 1; j < factories.size(); j++) {
                 edgesPosition.add(new Pair<>(factories.get(i).getPosition(), factories.get(j).getPosition()));
-                //Edge e = new Edge(factories.get(i).getId(), factories.get(j).getId());
             }
         }
     }
@@ -191,7 +176,6 @@ public class World {
     }
 
     private void calculateBidirectionalPath(Position start, Position end) {
-        //System.out.println("Path tra " + start + " e " + end);
         ArrayList<Position> path = new ArrayList<>();
         path.add(start);
 
@@ -205,64 +189,61 @@ public class World {
             int deltaY = Integer.compare(end.y(), y);
 
             if (deltaX != 0 && deltaY != 0) {
-                // Controlla la diagonale
+                // Check if it is possible to move diagonally
                 if (!isFactory(new Position(x + deltaX, y + deltaY)) || (x + deltaX == end.x() && y + deltaY == end.y())){
                     x += deltaX;
                     y += deltaY;
                 } else if (!isFactory(new Position(x + deltaX, y)) || (x + deltaX == end.x() && y == end.y())) {
-                    // Sposta orizzontalmente se possibile
+                    // Move horizontally if possible
                     x += deltaX;
                 } else if (!isFactory(new Position(x, y + deltaY)) || (y + deltaY == end.y())) {
-                    // Sposta verticalmente se possibile
+                    // Move vertically if possible
                     y += deltaY;
                 } else {
-                    // Se non è possibile muoversi né in orizzontale né in verticale, termina il calcolo
-                    System.out.println("Non è possibile muoversi 1");
+                    // If it is not possible to move diagonally, horizontally or vertically, stop the calculation
                     break;
                 }
             } else if (deltaX != 0) {
-                // Sposta orizzontalmente se non si è ancora sulla stessa colonna
+                // Move horizontally if not on the same row
                 if (!isFactory(new Position(x + deltaX, y)) || (x + deltaX == end.x())) {
                     x += deltaX;
                 } else {
-                    // Se non è possibile muoversi orizzontalmente, prova a muoversi in diagonale o verticalmente
+                    // If it is not possible to move horizontally, try to move diagonally
                     if (!isFactory(new Position(x + deltaX, y + deltaY))) {
-                        // Sposta in diagonale
+                        // Move diagonally
                         x += deltaX;
                         y += deltaY;
                     } else if (!isFactory(new Position(x, y + deltaY)) || (y + deltaY == end.y())) {
-                        // Sposta verticalmente
+                        // Move vertically
                         y += deltaY;
                     } else {
-                        // Se non è possibile muoversi diagonalmente o verticalmente, termina il calcolo
-                        System.out.println("Path tra " + start + " e " + end);
-                        System.out.println("Non è possibile muoversi 2");
+                        // If it is not possible to move horizontally, diagonally or vertically, stop the calculation
                         break;
                     }
                 }
             } else if (deltaY != 0) {
-                // Sposta verticalmente se non si è ancora sulla stessa riga
+                // Move vertically if not on the same column
                 if (!isFactory(new Position(x, y + deltaY)) || (y + deltaY == end.y())) {
                     y += deltaY;
                 } else {
-                    // Se non è possibile muoversi verticalmente, prova a muoversi in diagonale
+                    // If it is not possible to move vertically, try to move diagonally
                     if (!isFactory(new Position(x + deltaX, y + deltaY))) {
-                        // Sposta in diagonale
+                        // Move diagonally
                         x += deltaX;
                         y += deltaY;
                     } else if (!isFactory(new Position(x + deltaX, y)) || (x + deltaX == end.x())){
-                        // Sposta orizzontalmente
+                        // Move horizontally
                         x += deltaX;
                     }
                 }
             }
 
-            // Aggiunge la posizione corrente al percorso solo se non è già presente
+            // Add the current position to the path
             Position currentPos = new Position(x, y);
             if (!path.contains(currentPos)) {
                 path.add(currentPos);
             } else {
-                //Aggiunge il prossimo passo del percorso senza considerare le factories
+                // Add the current position to the path only if it is not already in the path
                 x += deltaX;
                 y += deltaY;
                 path.add(new Position(x, y));
@@ -271,7 +252,7 @@ public class World {
         }
 
         this.paths.add(path);
-        //add the reverse path
+        // Add the reverse path
         ArrayList<Position> reversePath = new ArrayList<>();
         for(int i = path.size() - 1; i >= 0; i--){
             reversePath.add(path.get(i));
@@ -322,10 +303,6 @@ public class World {
         return isType(p, Block.EMPTY);
     }
 
-    public int getSize() {
-        return blocks.length;
-    }
-
     // GETTERS
     public ArrayList<Factory> getFactories() {
         return factories;
@@ -340,16 +317,8 @@ public class World {
         return null;
     }
 
-    public ArrayList<Pair<Position, Position>> getEdgesPosition() {
-        return edgesPosition;
-    }
-
     public ArrayList<Edge> getEdgesObject() {
         return edgesObject;
-    }
-
-    public ArrayList<ArrayList<Position>> getPaths() {
-        return paths;
     }
 
     public ArrayList<ArrayList<Position>> getActivePaths() {
@@ -362,14 +331,6 @@ public class World {
 
     public ArrayList<Projectile> getProjectiles() {
         return projectiles;
-    }
-
-    public void addProjectile(Projectile p){
-        projectiles.add(p);
-    }
-
-    public void removeProjectile(Projectile p){
-        projectiles.remove(p);
     }
 
     public void addProjectiles(ArrayList<TransitTroop> moves){
@@ -395,10 +356,6 @@ public class World {
                 }
             }
         }
-    }
-
-    public void removeActivePath(ArrayList<Position> path){
-        activePaths.remove(path);
     }
 
     public int getDistanceByFactoriesId(int f1, int f2){
