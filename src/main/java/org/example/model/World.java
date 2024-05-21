@@ -128,7 +128,9 @@ public class World {
     private boolean checkFairness(){
         //Check the first half of the world
         int prodHalf1=0;
+        int cyborgsHalf1 = 0;
         int prodHalf2=0;
+        int cyborgsHalf2 = 0;
         for (int i = 0; i < blocks.length / 2; i++) {
             for (int j = 0; j < blocks[0].length; j++) {
                 Position p = new Position(i, j);
@@ -137,6 +139,7 @@ public class World {
                     for (Factory f : factories) {
                         if(f.getPosition().equals(p)){
                             prodHalf1 += f.getProduction();
+                            cyborgsHalf1 += f.getCyborgs();
                         }
                     }
                 }
@@ -152,12 +155,13 @@ public class World {
                     for (Factory f : factories) {
                         if(f.getPosition().equals(p)){
                             prodHalf2 += f.getProduction();
+                            cyborgsHalf2 += f.getCyborgs();
                         }
                     }
                 }
             }
         }
-        return prodHalf1 == prodHalf2;
+        return prodHalf1 == prodHalf2 && cyborgsHalf1 == cyborgsHalf2;
     }
 
     private void initializeEdges(){
